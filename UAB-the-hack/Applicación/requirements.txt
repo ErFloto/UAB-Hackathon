@@ -1,0 +1,17 @@
+# App (Streamlit)
+streamlit>=1.40
+pandas>=2.2
+plotly>=5.24
+matplotlib>=3.8
+qrcode[pil]>=8.0
+Pillow>=10.0
+
+# Dades sintètiques i anonimització
+faker>=24.0
+
+# Models (Encuesta.py, entrenament_nb.py)
+scikit-learn>=1.4
+joblib>=1.3
+
+# Tests (python -m pytest tests/)
+pytest>=8.0
