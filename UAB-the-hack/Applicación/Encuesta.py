@@ -22,10 +22,14 @@ load_dotenv()
 
 # Variables llestes per ser utilitzades al codi
 
+ruta_env = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(ruta_env)
 
-ESCOLTA_MODE = "api"
-API_URL = "https://dcc-llm-gw.uab.cat/uabthehack/v1"
-API_KEY = "uth-89419959f754f42b387b2f237ce202a6c17a8d21"
+ESCOLTA_MODE = os.getenv("ESCOLTA_MODE", "mock").strip()
+API_URL = os.getenv("ESCOLTA_API_URL", "https://dcc-llm-gw.uab.cat/uabthehack/v1").strip()
+API_KEY = os.getenv("ESCOLTA_API_KEY", "").strip()
+
+print(f"--- INFO HACKATO: API_KEY carregada? {'SÍ' if API_KEY else 'NO'} ---")
 
 # ... la resta del teu codi a continuació ...
 
