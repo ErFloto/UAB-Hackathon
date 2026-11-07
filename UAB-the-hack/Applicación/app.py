@@ -27,7 +27,7 @@ import datos
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="Escolta · Damm",
+    page_title="EscoltDamm",
     page_icon="⭐",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -37,6 +37,7 @@ ui.injecta_css()
 PAGINES = [
     "Inici",
     "Nova consulta",
+    "Participació",
     "Anàlisi",
     "Insights i accions",
     "Privacitat",
