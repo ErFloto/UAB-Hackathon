@@ -144,7 +144,7 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                 "temperature": 0.95
             }
             
-            response = requests.post(f"{API_URL}/chat/completions", headers=headers, json=payload, timeout=20)
+            response = requests.post(f"{API_URL}/chat/completions", headers=headers, json=payload, timeout=120)
             
             if response.status_code == 200:
                 res_json = response.json()
