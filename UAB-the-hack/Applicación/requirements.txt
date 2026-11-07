@@ -5,7 +5,8 @@ plotly>=5.24
 matplotlib>=3.8
 qrcode[pil]>=8.0
 Pillow>=10.0
-
+dotenv
+steamlib
 # Dades sintètiques i anonimització
 faker>=24.0
 
