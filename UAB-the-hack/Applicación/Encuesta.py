@@ -105,7 +105,17 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
     objectiu = str(necessitat.get("objectiu", "")).strip()
     collectiu = str(necessitat.get("col_lectiu", "Equip"))
     context = str(necessitat.get("context", "")).strip()
-    durada_max = int(necessitat.get("durada_max", 2))
+    # Get the value, defaulting to "Moderat" if not set
+    durada_val = necessitat.get("durada_max", "Moderat")
+
+    # Map string labels to numeric values
+    mapping = {"Curt": 1, "Moderat": 2, "Llarg": 3}
+
+    # If it's already an int (for backwards compatibility), keep it; otherwise map the string
+    if isinstance(durada_val, int):
+        durada_max = durada_val
+    else:
+        durada_max = mapping.get(durada_val, 2)
     canal = str(necessitat.get("canal", "Mòbil-QR"))
     to = str(necessitat.get("to", "Proper i directe"))
     prohibits = [str(x).lower() for x in necessitat.get("temes_prohibits", [])]
