@@ -26,7 +26,7 @@ ruta_env = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(ruta_env)
 
 ESCOLTA_MODE = os.getenv("ESCOLTA_MODE", "mock").strip()
-API_URL = os.getenv("ESCOLTA_API_URL", "https://dcc-llm-gw.uab.cat/uabthehack/v1").strip()
+API_URL = os.getenv("ESCOLTA_API_URL", "").strip()
 API_KEY = os.getenv("ESCOLTA_API_KEY", "").strip()
 
 print(f"--- INFO HACKATO: API_KEY carregada? {'SÍ' if API_KEY else 'NO'} ---")
