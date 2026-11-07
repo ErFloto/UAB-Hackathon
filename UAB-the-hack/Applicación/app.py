@@ -37,11 +37,9 @@ ui.injecta_css()
 PAGINES = [
     "Inici",
     "Nova consulta",
-    "Participació",
     "Anàlisi",
     "Insights i accions",
     "Privacitat",
-    "Guió de demo",
 ]
 
 COLORS = ["#831B1E", "#FAB626", "#2F7D5C", "#E32819", "#6F5F5A", "#C9A66B"]
@@ -173,10 +171,9 @@ def pagina_inici() -> None:
         "col·lectiu, aconsegueix participació representativa i converteix les respostes "
         "en insights i accions, sempre amb anonimat i control humà.",
         [
-            "100% dades sintètiques",
             "Anonimat per disseny",
             "La IA proposa, les persones decideixen",
-            "Typeform + QR + Teams",
+            "NFC + QR + Correu",
         ],
     )
 
@@ -228,8 +225,7 @@ def pagina_inici() -> None:
     with t1:
         ui.callout(
             "Participació",
-            "Feedback representatiu sense saturar les persones. Mòbil, QR, recordatoris i "
-            "control de cobertura per col·lectiu.",
+            "Volem obtenir un feedback actiu sense saturar al personal. Amb facilitats QR i mòbil ",
             "info",
         )
     with t2:
@@ -249,28 +245,12 @@ def pagina_inici() -> None:
 
     st.markdown("<div style='height:1.2rem'></div>", unsafe_allow_html=True)
 
-    ui.seccio("Escenaris", "Tres escenaris, una mateixa plataforma", "Tria un per a la demo final.")
-    e1, e2, e3 = st.columns(3)
-    escenaris = [
-        ("Escenari A · Canvi organitzatiu", "Nou sistema de torns. RRHH vol saber si s'ha entès i què cal reforçar en menys de 2 minuts.", "Nova consulta + Participació + Anàlisi"),
-        ("Escenari B · Planta i logística", "Poc temps, sense ordinador. Experiència mòbil via QR i avís quan la mostra no és representativa.", "Publicació QR + Alertes de representativitat"),
-        ("Escenari C · 500 comentaris", "Agrupar, resumir, detectar temes emergents i proposar àrees d'actuació amb límits explicats.", "Anàlisi + Insights i accions"),
-    ]
-    for col, (titol, text, tag) in zip((e1, e2, e3), escenaris):
-        with col:
-            st.markdown(
-                f"<div class='callout' style='min-height:190px'>"
-                f"<div class='callout-title'>{titol}</div>"
-                f"<div style='color:#6F5F5A;font-size:0.9rem;line-height:1.45;margin:0.35rem 0 0.6rem 0'>{text}</div>"
-                f"{ui.pill(tag, 'gold')}</div>",
-                unsafe_allow_html=True,
-            )
-
     st.markdown("<div style='height:1.2rem'></div>", unsafe_allow_html=True)
     ui.callout(
-        "Privacitat per disseny",
-        "Resultats sempre agregats · llindar mínim per segment · eliminació automàtica de dades "
-        "identificatives · cap perfil individual · control humà abans de publicar i abans d'actuar.",
+        "Privacitat des del primer moment",
+        "Hem dissenyat el sistema posant la protecció de dades al centre de tot · visió global amb resultats "
+        "agrupats i mínim de persones per grup · esborrat automàtic de dades identificatives · "
+        "cap perfil personal · un equip humà valida la informació abans de publicar o actuar.",
         "ok",
     )
 
@@ -927,9 +907,10 @@ def pagina_privacitat() -> None:
 
     c1, c2, c3 = st.columns(3)
     with c1:
-        ui.callout("Sempre agregat", "Mai es mostren respostes individuals. L'objectiu de resposta és un percentatge de la població de cada col·lectiu (configurable, 5-25%): per sota es mostra amb avís. Només s'oculta una mostra de menys de 8 respostes.", "ok")
+        ui.callout("Resultats 100% anònims i contextualitzats",
+    "Mai mostrem respostes individuals i afegim un avís quan no s'arriba a l'objectiu de participació.", "ok")
     with c2:
-        ui.callout("Minimització", "Només es recullen els camps necessaris. Els comentaris es netegen de PII abans d'analitzar-los.", "ok")
+        ui.callout("Minimització", "Només es recullen els camps necessaris.", "ok")
     with c3:
         ui.callout("Control humà", "La IA proposa consultes i recomanacions; les persones validen abans de publicar i actuar.", "ok")
 
