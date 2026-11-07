@@ -7,6 +7,39 @@ representativa i en insights i accions, amb anonimat i control humà.
 > Totes les dades són **100% sintètiques**. No hi ha cap dada real de Damm ni de
 > persones treballadores. Aquest prototip no és una eina de vigilància.
 
+
+## ⚙️ Configuració de l'Entorn (Claus d'API)
+
+Aquest projecte utilitza un fitxer ocult de variables d'entorn (`.env`) per connectar-se a la passarel·la d'IA de manera 100% segura, evitant exposar les contrasenyes al codi font.
+
+Per fer funcionar la generació de preguntes amb IA al teu ordinador, segueix aquests passos:
+
+1. A la carpeta de l'aplicació, crea un fitxer anomenat **exactament** `.env` (sense `.txt` ni `.example` al final).
+2. Obre'l amb qualsevol editor de text i copia-hi aquesta estructura:
+
+```env
+
+# Copia aquest fitxer a .env i omple els valors NOMÉS al teu dispositiu.
+
+# Mode de la demo: mock (sense xarxa) o api (backend real)
+ESCOLTA_MODE=api
+
+# Typeform (comparteix el token només dins de l'equip)
+TYPEFORM_TOKEN=
+TYPEFORM_FORM_ID=
+
+# Model d'IA (opcional). Si no hi ha clau, la demo funciona en mode mock.
+OPENAI_API_KEY=
+OPENAI_MODEL=
+
+# Backend propi (si el frontend es connecta a un equip separat)
+ESCOLTA_API_URL= "La teva URL aquí"
+ESCOLTA_API_KEY= "La teva API aqui"
+
+# Llindar mínim de respostes per segment (5-10)
+PRIVACY_THRESHOLD=15.0
+
+
 ## Executar-ho en aquest dispositiu (Windows)
 
 Ja hi ha un entorn virtual creat a l'arrel del repositori.
