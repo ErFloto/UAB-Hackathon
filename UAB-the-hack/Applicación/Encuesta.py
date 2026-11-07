@@ -129,23 +129,28 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                 "Authorization": f"Bearer {API_KEY}",
                 "Content-Type": "application/json"
             }
+        # Definim una descripció de la durada orientativa segons el valor
+            map_durada_text = {1: "curta (aproximadament 3 preguntes)", 2: "moderada (aproximadament 5-6 preguntes)", 3: "llarga (més de 7 preguntes)"}
+            descripcio_durada = map_durada_text.get(durada_max, "moderada")
+
             prompt_sistema = (
                 "Ets un expert en recursos humans i disseny d'enquestes de clima laboral. "
                 "Genera un conjunt de preguntes 100% originals, creatives i totalment personalitzades per a l'objectiu indicat. "
+                f" Tingues en compte que la mida de la consulta ha de ser {descripcio_durada} (no cal clavar un nombre exacte, però adapta't a aquesta extensió). "
                 "No utilitzis plantilles fixes. Varia els tipus de pregunta (pots usar 'Escala (1-5)', 'Opció múltiple', "
                 "'Sí / No' o 'Text obert'). "
                 "Has de retornar exclusivament un objecte JSON net, sense markdown addicional, amb aquesta estructura exacta:\n"
                 "{\n"
-                "  \"titol\": \"Títol original de la microconsulta\",\n"
-                "  \"intro\": \"Introducció empàtica i adaptada\",\n"
-                "  \"preguntes\": [\n"
-                "    {\n"
-                "      \"text\": \"Enunciat original de la pregunta?\",\n"
-                "      \"tipus\": \"Escala (1-5)\",\n"
-                "      \"opcions\": [\"1 - ...\", \"5 - ...\"],\n"
-                "      \"obligatoria\": true\n"
-                "    }\n"
-                "  ]\n"
+                "   \"titol\": \"Títol original de la microconsulta\",\n"
+                "   \"intro\": \"Introducció empàtica i adaptada\",\n"
+                "   \"preguntes\": [\n"
+                "      {\n"
+                "         \"text\": \"Enunciat original de la pregunta?\",\n"
+                "         \"tipus\": \"Escala (1-5)\",\n"
+                "         \"opcions\": [\"1 - ...\", \"5 - ...\"],\n"
+                "         \"obligatoria\": true\n"
+                "      }\n"
+                "   ]\n"
                 "}"
             )
             
@@ -153,7 +158,7 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                 "model": "ornith",
                 "messages": [
                     {"role": "system", "content": prompt_sistema},
-                    {"role": "user", "content": f"Objectiu: {objectiu}. Col·lectiu: {collectiu}. Context: {context}. To: {to}. Temes prohibits: {', '.join(prohibits)}."}
+                    {"role": "user", "content": f"Objectiu: {objectiu}. Col·lectiu: {collectiu}. Context: {context}. To: {to}. Extensió desitjada: {descripcio_durada}. Temes prohibits: {', '.join(prohibits)}."}
                 ],
                 "temperature": 0.95
             }
