@@ -11,6 +11,24 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+import os
+from dotenv import load_dotenv
+
+import json
+import requests
+
+# Carrega les variables del fitxer .env
+load_dotenv()
+
+# Variables llestes per ser utilitzades al codi
+
+
+ESCOLTA_MODE = "api"
+API_URL = "https://dcc-llm-gw.uab.cat/uabthehack/v1"
+API_KEY = "uth-89419959f754f42b387b2f237ce202a6c17a8d21"
+
+# ... la resta del teu codi a continuació ...
+
 # ---------------------------------------------------------------------------
 # TEMES DE CONSULTA (es mantenen separats dels tons)
 # ---------------------------------------------------------------------------
@@ -79,7 +97,7 @@ accuracy = accuracy_score(y_test, y_pred)
 # ---------------------------------------------------------------------------
 
 def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
-    """Genera una proposta de microconsulta editable; no la publica."""
+    """Genera microconsultes 100% originals i dinàmiques a través de la IA de la UAB amb depuració d'errors."""
     objectiu = str(necessitat.get("objectiu", "")).strip()
     collectiu = str(necessitat.get("col_lectiu", "Equip"))
     context = str(necessitat.get("context", "")).strip()
@@ -88,92 +106,124 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
     to = str(necessitat.get("to", "Proper i directe"))
     prohibits = [str(x).lower() for x in necessitat.get("temes_prohibits", [])]
 
-    # Identifica el tema a partir del text, sense confondre'l amb el to.
-    tema = "Altres"
-    text_cerca = f"{objectiu} {context}".lower()
-    paraules_tema = {
-        "Educació": ("educació", "formació", "aprenentatge", "curs"),
-        "Treball": ("treball", "feina", "torn", "planta", "empresa"),
-        "Habitatge": ("habitatge", "lloguer", "casa"),
-        "Salut": ("salut", "benestar", "estrès"),
-        "Economia": ("economia", "despesa", "cost", "sou"),
-    }
-    for nom, paraules in paraules_tema.items():
-        if any(p in text_cerca for p in paraules):
-            tema = nom
-            break
-
-    intros_to = {
-        "Proper i directe": "Volem conèixer la teva opinió de manera senzilla i directa.",
-        "Formal i professional": "Aquesta consulta té com a objectiu recollir la teva valoració.",
-        "Proper i empàtic": "Ens interessa entendre la teva experiència i com et sents.",
-    }
-    intro = intros_to.get(to, intros_to["Proper i directe"])
-    if context:
-        intro += f" Aquesta consulta se centra en: {context}."
-    intro += " Les respostes es tractaran de manera agregada."
-
-    preguntes_base = [
-        {
-            "id": "q1",
-            "text": f"Com valores actualment {objectiu.rstrip('.')}?" if objectiu else "Com valores aquesta situació?",
-            "tipus": TIPUS_ESCALA,
-            "opcions": ["1 - Molt malament", "2 - Malament", "3 - Normal", "4 - Bé", "5 - Molt bé"],
-            "obligatoria": True,
-            "condicional": "",
-        },
-        {
-            "id": "q2",
-            "text": "Quin és el principal aspecte que funciona bé?",
-            "tipus": TIPUS_OPCIONS,
-            "opcions": ["Organització", "Comunicació", "Recursos", "Acompanyament", "Cap d'aquests"],
-            "obligatoria": True,
-            "condicional": "",
-        },
-        {
-            "id": "q3",
-            "text": "Què canviaries o milloraries?",
-            "tipus": TIPUS_OBERT,
-            "opcions": [],
-            "obligatoria": False,
-            "condicional": "",
-        },
-    ]
-
-    # Evita preguntes sobre temes prohibits.
     preguntes = []
-    for pregunta in preguntes_base:
-        text_pregunta = pregunta["text"].lower()
-        if any(prohibit and prohibit in text_pregunta for prohibit in prohibits):
-            continue
-        preguntes.append(pregunta)
+    error_detallat = None
 
-    # La variació canvia l'ordre de les preguntes sense alterar-ne el contingut.
-    if variacio and len(preguntes) > 1:
-        random.Random(variacio).shuffle(preguntes)
+    if ESCOLTA_MODE == "api" and API_KEY:
+        try:
+            headers = {
+                "Authorization": f"Bearer {API_KEY}",
+                "Content-Type": "application/json"
+            }
+            prompt_sistema = (
+                "Ets un expert en recursos humans i disseny d'enquestes de clima laboral. "
+                "Genera un conjunt de preguntes 100% originals, creatives i totalment personalitzades per a l'objectiu indicat. "
+                "No utilitzis plantilles fixes. Varia els tipus de pregunta (pots usar 'Escala (1-5)', 'Opció múltiple', "
+                "'Sí / No' o 'Text obert'). "
+                "Has de retornar exclusivament un objecte JSON net, sense markdown addicional, amb aquesta estructura exacta:\n"
+                "{\n"
+                "  \"titol\": \"Títol original de la microconsulta\",\n"
+                "  \"intro\": \"Introducció empàtica i adaptada\",\n"
+                "  \"preguntes\": [\n"
+                "    {\n"
+                "      \"text\": \"Enunciat original de la pregunta?\",\n"
+                "      \"tipus\": \"Escala (1-5)\",\n"
+                "      \"opcions\": [\"1 - ...\", \"5 - ...\"],\n"
+                "      \"obligatoria\": true\n"
+                "    }\n"
+                "  ]\n"
+                "}"
+            )
+            
+            payload = {
+                "model": "ornith",
+                "messages": [
+                    {"role": "system", "content": prompt_sistema},
+                    {"role": "user", "content": f"Objectiu: {objectiu}. Col·lectiu: {collectiu}. Context: {context}. To: {to}. Temes prohibits: {', '.join(prohibits)}."}
+                ],
+                "temperature": 0.95
+            }
+            
+            response = requests.post(f"{API_URL}/chat/completions", headers=headers, json=payload, timeout=20)
+            
+            if response.status_code == 200:
+                res_json = response.json()
+                content = res_json["choices"][0]["message"]["content"]
+                
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0].strip()
+                elif "```" in content:
+                    content = content.split("```")[1].split("```")[0].strip()
+                
+                parsed = json.loads(content)
+                titol_ia = parsed.get("titol", f"Microconsulta: {objectiu}")
+                intro_ia = parsed.get("intro", f"Volem conèixer la vostra opinió sobre {objectiu}.")
+                
+                raw_q = parsed.get("preguntes", [])
+                for i, q in enumerate(raw_q):
+                    preguntes.append({
+                        "id": f"q{i + 1}",
+                        "text": q.get("text", ""),
+                        "tipus": q.get("tipus", TIPUS_ESCALA),
+                        "opcions": q.get("opcions", []),
+                        "obligatoria": q.get("obligatoria", True),
+                        "condicional": ""
+                    })
+                
+                if preguntes:
+                    return {
+                        "titol": titol_ia,
+                        "intro": intro_ia,
+                        "objectiu": objectiu,
+                        "col_lectiu": collectiu,
+                        "context": context,
+                        "temes": ["Treball"],
+                        "to": to,
+                        "durada_max": durada_max,
+                        "temps_estimat": min(durada_max, len(preguntes)),
+                        "canal": canal,
+                        "logica": [],
+                        "preguntes": preguntes,
+                        "estat": "Esborrany",
+                        "qr": None,
+                        "enllac": "",
+                        "publicada_el": "",
+                    }
+            else:
+                error_detallat = f"HTTP {response.status_code}: {response.text}"
+        except Exception as e:
+            error_detallat = str(e)
 
-    temps_estimat = max(1, min(durada_max, len(preguntes)))
-    titol = f"Microconsulta sobre {tema.lower()}"
-
+    # Si arriba aquí és que l'API ha fallat o no ha retornat res; mostrem l'error exacte per depurar
+    text_error = f"[Error API UAB] No s'ha pogut connectar amb la IA. Detall: {error_detallat}" if error_detallat else "[Avís] No s'han rebut dades de l'API."
+    
     return {
-        "titol": titol,
-        "intro": intro,
+        "titol": f"Error de connexió amb la IA",
+        "intro": text_error,
         "objectiu": objectiu,
         "col_lectiu": collectiu,
         "context": context,
-        "temes": [tema],
+        "temes": ["Error"],
         "to": to,
         "durada_max": durada_max,
-        "temps_estimat": temps_estimat,
+        "temps_estimat": 1,
         "canal": canal,
         "logica": [],
-        "preguntes": preguntes,
+        "preguntes": [
+            {
+                "id": "q1",
+                "text": text_error,
+                "tipus": TIPUS_OBERT,
+                "opcions": [],
+                "obligatoria": True,
+                "condicional": ""
+            }
+        ],
         "estat": "Esborrany",
         "qr": None,
         "enllac": "",
         "publicada_el": "",
     }
-
 
 def publica_consulta(consulta: dict) -> dict:
     """Marca la consulta com a publicada i prepara un QR/enllaç de demostració."""
