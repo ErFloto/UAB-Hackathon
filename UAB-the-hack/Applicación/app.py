@@ -322,7 +322,7 @@ def pagina_nova_consulta() -> None:
             col1, col2 = st.columns(2)
             with col1:
                 collectiu = st.selectbox("Col·lectiu", datos.COL_LECTIUS, index=0)
-                durada = st.slider("Durada màxima (minuts)", 1, 3, 2)
+                durada = st.select_slider("Durada màxima", options=["Curt", "Moderat", "Llarg"])
                 canal = st.selectbox("Canal principal", datos.CANALS, index=0)
             with col2:
                 context = st.text_input("Context (opcional)", value="Nou sistema de torns · octubre 2026")
