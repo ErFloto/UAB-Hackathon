@@ -306,7 +306,7 @@ def pagina_nova_consulta() -> None:
 
     if consulta is None:
         st.markdown(
-            f"{ui.pill('Pas 1 de 3 · Definir la necessitat', 'blue')}",
+            f"{ui.pill('Definir la necessitat', 'blue')}",
             unsafe_allow_html=True,
         )
         st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
@@ -357,7 +357,7 @@ def pagina_nova_consulta() -> None:
     # ---- Proposta generada -------------------------------------------------
     publicada = consulta.get("estat") == "Publicada"
     estat_pill = "green" if publicada else "gold"
-    pas_pill = "Pas 3 de 3 · Publicació" if publicada else "Pas 2 de 3 · Revisar i validar"
+    pas_pill = "Publicació" if publicada else "Revisar i validar"
     pills = " ".join(
         [
             ui.pill(pas_pill, "blue"),
@@ -442,7 +442,7 @@ def pagina_nova_consulta() -> None:
         with p1:
             qr_bytes = BytesIO()
             consulta["qr"].save(qr_bytes, format="PNG")
-            st.image(qr_bytes.getvalue(), caption="QR per a planta i logística", width=210)
+            st.image(qr_bytes.getvalue(), caption="QR", width=210)
         with p2:
             st.markdown("**Enllaç de participació (simulat via API Typeform)**")
             st.code(consulta["enllac"], language=None)
@@ -486,7 +486,7 @@ def pagina_nova_consulta() -> None:
 
 def pagina_participacio() -> None:
     ui.seccio(
-        "Pas 5 · Participació",
+        "Participació",
         "Qui ha respost i qui falta",
         "La representativitat es mesura per col·lectiu, no només en global.",
     )
@@ -632,7 +632,7 @@ def pagina_participacio() -> None:
 
 def pagina_analisi() -> None:
     ui.seccio(
-        "Pas 6 · Anàlisi",
+        "Anàlisi",
         "Del comentari al tema, del tema a la tendència",
         "Anàlisi explicable: cada etiqueta es pot justificar amb les paraules que l'han activada.",
     )
@@ -727,7 +727,7 @@ def pagina_analisi() -> None:
         ui.callout(
             "Biaix intencionat de la demo",
             "El dataset sintètic fa créixer «Torns i horaris» i «Descansos i pauses» al segon període "
-            "i baixar «Comunicació». El sistema ho ha de detectar sense saber-ho d'antuvi.",
+            "i baixar «Comunicació». El sistema ho ha de detectar sense saber-ho d'entrada.",
             "info",
         )
         fig = go.Figure()
@@ -809,7 +809,7 @@ def pagina_analisi() -> None:
 
 def pagina_insights() -> None:
     ui.seccio(
-        "Pas 7 i 8 · Visualització i acció",
+        "Visualització i acció",
         "Insights que acaben en una decisió",
         "Les recomanacions són propostes prioritzades. RRHH decideix què es fa i quan.",
     )
@@ -955,25 +955,6 @@ def pagina_privacitat() -> None:
     )
     st.dataframe(esquema, width="stretch", hide_index=True)
 
-    st.markdown("##### Checklist abans d'entregar")
-    checks = [
-        "El flux funciona de la necessitat a la recomanació",
-        "Hi ha validació humana abans de publicar",
-        "Les dades són 100% sintètiques",
-        "Hi ha llindar mínim i resultats només agregats",
-        "Cap token ni secret al codi o a la presentació",
-        "README i .env.example inclosos",
-        "Demo de seguretat (vídeo o captures) preparada",
-    ]
-    for c in checks:
-        st.markdown(f"- ✅ {c}")
-
-    st.markdown("##### Seguretat tècnica")
-    st.code(
-        "# .env (fora del repositori)\nTYPEFORM_TOKEN=***\nOPENAI_API_KEY=***\n\n"
-        "# .gitignore\n.env\n.venv/\n__pycache__/\n*.csv\n",
-        language="bash",
-    )
     ui.callout(
         "Prohibit",
         "Pujar tokens o claus al repositori, compartir el token de Typeform fora de l'equip, carregar "

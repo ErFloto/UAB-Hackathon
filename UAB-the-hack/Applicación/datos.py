@@ -46,7 +46,7 @@ CENTRES = {
     "Manager": "Oficina",
 }
 
-CANALS = ["Mòbil-QR", "NFC"]
+CANALS = ["Mòbil-QR", "NFC", "Correu"]
 
 PERIODES = ["2026-T3", "2026-T4"]
 
