@@ -81,14 +81,14 @@ if MODO_RESPOTA:
                 q_id = q.get("id", f"q_{i}")
                 
                 if tipus == Encuesta.TIPUS_ESCALA:
-                    respostes_usuari[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], horizontal=True, key=f"ext_{q_id}_{i}")
+                    respostes_usuari[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], index=None, horizontal=True, key=f"ext_{q_id}_{i}")
                 elif tipus == Encuesta.TIPUS_SI_NO:
-                    respostes_usuari[q_id] = st.radio("Sí/No", ["Sí", "No"], horizontal=True, key=f"ext_{q_id}_{i}")
+                    respostes_usuari[q_id] = st.radio("Sí/No", ["Sí", "No"], index=None, horizontal=True, key=f"ext_{q_id}_{i}")
                 elif tipus == Encuesta.TIPUS_OPCIONS:
                     opcions = q.get("opcions", ["Opció 1", "Opció 2"])
                     if not opcions:
                         opcions = ["Opció 1", "Opció 2"]
-                    respostes_usuari[q_id] = st.radio("Tria una opció", opcions, key=f"ext_{q_id}_{i}")
+                    respostes_usuari[q_id] = st.radio("Tria una opció", opcions, index=None, key=f"ext_{q_id}_{i}")
                 else:
                     respostes_usuari[q_id] = st.text_area("Escriu la teva resposta...", key=f"ext_{q_id}_{i}")
                 
@@ -96,11 +96,11 @@ if MODO_RESPOTA:
                 
             enviat = st.form_submit_button("Enviar respostes", type="primary", use_container_width=True)
             if enviat:
-                # Les preguntes de text obert obligatòries no es poden deixar buides.
+                # Cap pregunta obligatòria (de qualsevol tipus) pot quedar sense resposta.
                 buides = [
                     q for q in preguntes
-                    if q.get("obligatoria") and q.get("tipus") == Encuesta.TIPUS_OBERT
-                    and not str(respostes_usuari.get(q.get("id", ""), "")).strip()
+                    if q.get("obligatoria")
+                    and not str(respostes_usuari.get(q.get("id", ""), "") or "").strip()
                 ]
                 if buides:
                     st.error("Falta respondre alguna pregunta obligatòria.")
@@ -428,12 +428,12 @@ def mostrar_formulario_final(consulta: dict) -> None:
             q_id = q.get("id", f"q_{i}")
             
             if tipus == Encuesta.TIPUS_ESCALA:
-                respuestas[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], horizontal=True, label_visibility="collapsed", key=f"form_{q_id}")
+                respuestas[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], index=None, horizontal=True, label_visibility="collapsed", key=f"form_{q_id}")
             elif tipus == Encuesta.TIPUS_SI_NO:
-                respuestas[q_id] = st.radio("Sí/No", ["Sí", "No"], horizontal=True, label_visibility="collapsed", key=f"form_{q_id}")
+                respuestas[q_id] = st.radio("Sí/No", ["Sí", "No"], index=None, horizontal=True, label_visibility="collapsed", key=f"form_{q_id}")
             elif tipus == Encuesta.TIPUS_OPCIONS:
                 opcions = q.get("opcions", ["Opció 1", "Opció 2"])
-                respuestas[q_id] = st.radio("Tria una opció", opcions, label_visibility="collapsed", key=f"form_{q_id}")
+                respuestas[q_id] = st.radio("Tria una opció", opcions, index=None, label_visibility="collapsed", key=f"form_{q_id}")
             else:
                 respuestas[q_id] = st.text_area("La teva resposta...", label_visibility="collapsed", key=f"form_{q_id}")
             
@@ -565,6 +565,7 @@ def _preguntes_a_df(preguntes: list[dict]) -> pd.DataFrame:
             "Tipus": p.get("tipus", "Text obert"),
             "Opcions": opcions_str,
             "Obligatòria": bool(p.get("obligatoria", True)),
+            "Dimensió": p.get("dimensio", "") or "",
         })
         
     return pd.DataFrame(files)
@@ -586,6 +587,7 @@ def _df_a_preguntes(editat: pd.DataFrame, originals: list[dict]) -> list[dict]:
                 "tipus": str(row.get("Tipus", "Text obert")),
                 "opcions": opcions,
                 "obligatoria": bool(row.get("Obligatòria", True)),
+                "dimensio": str(row.get("Dimensió", "") or ""),
                 "condicional": "",
             }
         )
@@ -700,6 +702,10 @@ def pagina_nova_consulta() -> None:
             ),
             "Opcions": st.column_config.TextColumn("Opcions (separades per |)", width="medium"),
             "Obligatòria": st.column_config.CheckboxColumn("Obligatòria", width="small"),
+            "Dimensió": st.column_config.SelectboxColumn(
+                "Dimensió (escales)", options=["", *Encuesta.DIMENSIONS], width="small",
+                help="Què mesura aquesta pregunta. Determina on es desa la resposta a l'anàlisi.",
+            ),
         },
         disabled=publicada,
     )

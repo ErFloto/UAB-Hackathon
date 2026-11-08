@@ -63,6 +63,9 @@ TIPUS_OPCIONS = "Opció múltiple"
 TIPUS_SI_NO = "Sí / No"
 TIPUS_OBERT = "Text obert"
 
+# Dimensió que mesura cada pregunta d'escala. Cada una es desa a la seva columna d'anàlisi.
+DIMENSIONS = ["benestar", "càrrega", "comunicació", "reconeixement"]
+
 # ---------------------------------------------------------------------------
 # MODEL DE CLASSIFICACIÓ
 # ---------------------------------------------------------------------------
@@ -140,6 +143,8 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                 f" Tingues en compte que la mida de la consulta ha de ser {descripcio_durada} (no cal clavar un nombre exacte, però adapta't a aquesta extensió). "
                 "No utilitzis plantilles fixes. Varia els tipus de pregunta (pots usar 'Escala (1-5)', 'Opció múltiple', "
                 "'Sí / No' o 'Text obert'). Es important que les opcions tinguin sentit i que segueixin les regles ortografiques del catala, es a dir la l·l geminada es un mateixa paraula, Importantisi Ejemplo tranquil·litat por mucho que se escriba tranquil · litat es una misma palabra"
+                "Cada pregunta d'escala ha de portar el camp 'dimensio', un d'aquests valors: benestar, càrrega, comunicació, reconeixement. "
+                "Orienta l'escala perquè 5 sigui el valor ALT de la dimensió (a 'càrrega', 5 = molta càrrega; una pregunta sobre calma o tranquil·litat és 'benestar'). "
                 "Has de retornar exclusivament un objecte JSON net, sense markdown addicional, amb aquesta estructura exacta:\n"
                 "{\n"
                 "   \"titol\": \"Títol original de la microconsulta\",\n"
@@ -149,6 +154,7 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                 "         \"text\": \"Enunciat original de la pregunta?\",\n"
                 "         \"tipus\": \"Escala (1-5)\",\n"
                 "         \"opcions\": [\"1 - ...\", \"5 - ...\"],\n"
+                "         \"dimensio\": \"benestar\",\n"
                 "         \"obligatoria\": true\n"
                 "      }\n"
                 "   ]\n"
@@ -187,6 +193,7 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                         "tipus": q.get("tipus", TIPUS_ESCALA),
                         "opcions": q.get("opcions", []),
                         "obligatoria": q.get("obligatoria", True),
+                        "dimensio": q.get("dimensio") if q.get("dimensio") in DIMENSIONS else "",
                         "condicional": ""
                     })
                 
