@@ -1,122 +1,50 @@
 {
-    "titol": "Què valorem realment de la nostra feina?",
-    "intro": "Aquesta petita consulta vol ajudar-nos a entendre què és el que més valorar de la vostra feina, més allá dels aspectes materials. Les vostres respostes ens permetran conèixer millor el que us fa sentir-vos compromesos, motivats i a gust aquí. No hi ha respostes correctes ni incorrectes; només la vostra perspectiva. Gràcies per ajudar-nos a construir un lloc de treball millor, junts.",
-    "objectiu": "hola que valoreu mes de la feina",
+    "titol": "Com esteus, de veritat?",
+    "intro": "Un moment per aturar-te i mirar cap a dins. No hi ha respostes correctes ni incorrectes: només vols saber com et sents, així que respon sense presses i amb honestedat.",
+    "objectiu": "Com esteu",
     "col_lectiu": "General",
     "context": "",
     "temes": [
         "Treball"
     ],
     "to": "Proper i directe",
-    "durada_max": 3,
-    "temps_estimat": 3,
+    "durada_max": 1,
+    "temps_estimat": 1,
     "canal": "Mòbil-QR",
     "logica": [],
     "preguntes": [
         {
             "id": "q1",
-            "text": "De totes les dimensions següents, quina és la que més valoreu de la vostra feina?",
-            "tipus": "Opció múltiple",
+            "text": "En general, com et sents aquestes darreres setmanes?",
+            "tipus": "Escala (1-5)",
             "opcions": [
-                "El bon ambient i les relacions amb l'equip",
-                "La possibilitat de créixer i aprendre cada dia",
-                "L'autonomia per prendre decisions",
-                "El sentit i l'impacte del que fem",
-                "La segureitat i l'estabilitat del lloc",
-                "L'equilibri entre la feina i la vida personal"
+                "1 - Cansat·da i sense energia",
+                "2 - Una mica carregat·da",
+                "3 - Ni bé ni malament",
+                "4 - Bé i amb força",
+                "5 - Molt bé i motivat·da"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q2",
-            "text": "Del 1 al 5, com valoraries el grau en què el que feu té un sentit per a tu?",
-            "tipus": "Escala (1-5)",
+            "text": "Què t'acompanya més sovint avui?",
+            "tipus": "Opció múltiple",
             "opcions": [
-                "1 - Per res",
-                "2 - Gens",
-                "3 - Una mica",
-                "4 - Molt",
-                "5 - Per molt"
+                "Tranquil·litat",
+                "Il·lusió",
+                "Prempresa",
+                "Cansament",
+                "Incertesa",
+                "Satisfacció"
             ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q3",
-            "text": "Sents que el que feu contribueix a alguna cosa més gran que vosaltres mateixos?",
-            "tipus": "Sí / No",
-            "opcions": [
-                "Sí",
-                "No"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q4",
-            "text": "Com valoraries el teu equilibri entre la feina i la vida personal durant les últimes setmanes?",
-            "tipus": "Escala (1-5)",
-            "opcions": [
-                "1 - Gens equilibrat",
-                "2 - Més avall desequilibrat",
-                "3 - Equilibrat",
-                "4 - Més avall equilibrat",
-                "5 - Molt equilibrat"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q5",
-            "text": "Descriu amb les teves paraules un moment en què has sentit orgull de la teva feina.",
-            "tipus": "Text obert",
-            "opcions": [],
             "obligatoria": false,
             "condicional": ""
         },
         {
-            "id": "q6",
-            "text": "Quin tipus de reconeixement valoraries més per part del teu entorn de treball?",
-            "tipus": "Opció múltiple",
-            "opcions": [
-                "Paraules d'animació i agraïment",
-                "Reconeixement públic davant l'equip",
-                "Oportunitats de creixement professional",
-                "Major autonomia en les decisions",
-                "Responsabilitats i repteus noves"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q7",
-            "text": "Fins a quin punt et sents valorat pel teu i i el vostre i?",
-            "tipus": "Escala (1-5)",
-            "opcions": [
-                "1 - Gens valorat",
-                "2 - Gens valorat",
-                "3 - Mitjanament valorat",
-                "4 - Molt valorat",
-                "5 - Molt valorat"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q8",
-            "text": "Et sentiries còmode recomanar el nostre lloc de treball a un amic o amiga?",
-            "tipus": "Sí / No",
-            "opcions": [
-                "Sí",
-                "No"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q9",
-            "text": "Si pogueres canviar una sola cosa del teu entorn de feina, quina seria?",
+            "id": "q3",
+            "text": "Ara t'obrim un espai per a tu. Què necessites avui perquè et sentis una mica millor?",
             "tipus": "Text obert",
             "opcions": [],
             "obligatoria": false,

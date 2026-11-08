@@ -12,6 +12,8 @@ Les dades són 100% sintètiques i l'anàlisi és determinista i explicable.
 from __future__ import annotations
 
 import html
+import os
+from urllib.parse import urlencode
 
 import pandas as pd
 import plotly.express as px
@@ -243,11 +245,26 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 
 def panel_distribucion_encuesta(consulta: dict) -> None:
-    ip_local = "localhost" 
-    url_publica = f"http://{ip_local}:8501/?respondre=true"  # <--- Canvi clau aquí
-    
+    # URL base del QR: PUBLIC_URL al .env (IP local o túnel). Sense ella, localhost
+    # només funciona al mateix ordinador, no des d'un mòbil.
+    base_url = os.getenv("PUBLIC_URL", "").strip().rstrip("/") or "http://localhost:8501"
+    # El col·lectiu i el canal viatgen al QR (un QR per col·lectiu): la persona no s'identifica.
+    url_publica = base_url + "/?" + urlencode(
+        {
+            "respondre": "true",
+            "col": consulta.get("col_lectiu", "General"),
+            "canal": consulta.get("canal", "Mòbil-QR"),
+        }
+    )
+
     st.subheader("Consulta llesta per distribuir")
-    
+    if "localhost" in base_url or "127.0.0.1" in base_url:
+        st.warning(
+            "Aquest QR apunta a localhost i NO funcionarà des d'un mòbil. "
+            "Defineix PUBLIC_URL al .env (IP local, p. ex. http://192.168.1.35:8501, o l'URL d'un túnel) "
+            "i reinicia l'app."
+        )
+
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("###  Enllaç Web")
