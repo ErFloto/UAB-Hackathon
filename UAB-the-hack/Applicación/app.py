@@ -11,6 +11,8 @@ Les dades són 100% sintètiques i l'anàlisi és determinista i explicable.
 
 from __future__ import annotations
 
+import html
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -21,6 +23,7 @@ import Encuesta
 import Interfaz as ui
 import analisis
 import datos
+import ia
 import qrcode
 
 params = st.query_params
@@ -419,7 +422,7 @@ def _preguntes_a_df(preguntes: list[dict]) -> pd.DataFrame:
         # Si és una llista (el comportament esperat)
         elif isinstance(opcions, list):
             # Ens assegurem que tot el que hi ha dins es converteixi a text (str) abans d'unir-ho
-            opcions_str = " · ".join([str(opt) for opt in opcions])
+            opcions_str = " | ".join([str(opt) for opt in opcions])
         else:
             opcions_str = ""
 
@@ -440,7 +443,8 @@ def _df_a_preguntes(editat: pd.DataFrame, originals: list[dict]) -> list[dict]:
         if not text:
             continue
         opcions_raw = str(row.get("Opcions", "") or "")
-        opcions = [o.strip() for o in opcions_raw.split("·") if o.strip()] if opcions_raw.strip() else []
+        # Separador "|" (no "·"): la l·l geminada, com a tranquil·litat, conté un "·".
+        opcions = [o.strip() for o in opcions_raw.split("|") if o.strip()] if opcions_raw.strip() else []
         preguntes.append(
             {
                 "id": f"q{i + 1}",
@@ -560,7 +564,7 @@ def pagina_nova_consulta() -> None:
                 options=[Encuesta.TIPUS_ESCALA, Encuesta.TIPUS_OPCIONS, Encuesta.TIPUS_SI_NO, Encuesta.TIPUS_OBERT],
                 width="medium",
             ),
-            "Opcions": st.column_config.TextColumn("Opcions (separades per ·)", width="medium"),
+            "Opcions": st.column_config.TextColumn("Opcions (separades per |)", width="medium"),
             "Obligatòria": st.column_config.CheckboxColumn("Obligatòria", width="small"),
         },
         disabled=publicada,
@@ -982,45 +986,123 @@ def pagina_analisi() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _targeta_solucio(s: dict) -> str:
+    """Targeta gran per a una solució generada per la IA (el text s'escapa: ve d'un model)."""
+    e = html.escape
+    impacte_kind = "green" if s["impacte"].lower().startswith("alt") else "gold"
+    passos = "".join(f"<li style='margin-bottom:0.25rem'>{e(p)}</li>" for p in s["passos"])
+    bloc_passos = (
+        f"<div style='margin-top:0.7rem'><b>Com ho farem</b>"
+        f"<ol style='margin:0.35rem 0 0 1.1rem;padding:0'>{passos}</ol></div>"
+        if passos
+        else ""
+    )
+    bloc_diag = (
+        f"<div class='hint' style='margin-top:0.2rem'>Què diuen les dades: {e(s['diagnostic'])}</div>"
+        if s["diagnostic"]
+        else ""
+    )
+    bloc_ind = (
+        f"<div style='margin-top:0.7rem'><b>Com sabrem que ha funcionat</b><br>{e(s['indicador'])}</div>"
+        if s["indicador"]
+        else ""
+    )
+    return (
+        "<div class='callout' style='margin-bottom:1rem;border-left:5px solid #FAB626;padding:1.1rem 1.3rem'>"
+        "<div style='display:flex;justify-content:space-between;gap:1rem;align-items:flex-start'>"
+        f"<div style='font-size:1.2rem;font-weight:700'>{e(str(s['prioritat']))}. {e(s['titol'])}</div>"
+        f"<div style='text-align:right;min-width:150px'>{ui.pill('Impacte ' + e(s['impacte']), impacte_kind)} "
+        f"{ui.pill('Esforç ' + e(s['esforc']), 'grey')}</div></div>"
+        f"{bloc_diag}"
+        f"<div style='font-size:1rem;margin-top:0.6rem;line-height:1.5'>{e(s['descripcio'])}</div>"
+        f"{bloc_passos}{bloc_ind}"
+        f"<div class='hint' style='margin-top:0.7rem'>Responsable: {e(s['responsable'])}</div>"
+        "</div>"
+    )
+
+
+def _demana_regenerar() -> None:
+    st.session_state.regenera_ia = True
+
+
 def pagina_insights() -> None:
     ui.seccio(
         "Visualització i acció",
         "Insights que acaben en una decisió",
-        "Les recomanacions són propostes prioritzades. RRHH decideix què es fa i quan.",
+        "L'anàlisi la fa l'app; la IA l'explica i proposa solucions. RRHH decideix què es fa i quan.",
     )
 
     df = df_global
+    # L'anàlisi no canvia: són les mateixes funcions d'analisis.py. La IA només
+    # n'interpreta els resultats. Aquestes dues sortides es fan servir com a
+    # alternativa determinista si la IA no respon.
     recs = analisis.recomanacions(df, maxim=4)
-    proposta = analisis.proposta_seguiment(df)
+    proposta_base = analisis.proposta_seguiment(df)
 
     if recs.empty:
         ui.callout("Sense dades suficients", "Calen més respostes per generar recomanacions.", "warn")
         return
 
-    st.markdown("##### Accions proposades")
-    for _, row in recs.iterrows():
-        st.markdown(
-            f"<div class='callout' style='margin-bottom:0.6rem;border-left:4px solid #FAB626'>"
-            f"<div style='display:flex;justify-content:space-between;gap:1rem;align-items:center'>"
-            f"<div><b>{row['Prioritat']}. {row['Tema']}</b><br>"
-            f"<span style='font-size:0.92rem'>{row['Acció proposada']}</span><br>"
-            f"<span class='hint'>{row['Suport']}</span></div>"
-            f"<div style='text-align:right;min-width:170px'>"
-            f"{ui.pill('Impacte ' + row['Impacte'], 'green' if row['Impacte'] == 'Alt' else 'gold')}<br>"
-            f"{ui.pill('Esforç ' + row['Esforç'], 'grey')}<br>"
-            f"<span class='hint'>{row['Responsable']}</span></div></div></div>",
-            unsafe_allow_html=True,
+    forca = st.session_state.pop("regenera_ia", False)
+    with st.spinner("La IA està llegint l'anàlisi i preparant les solucions…"):
+        informe, error_ia = ia.informe_amb_cache(st.session_state, df, st.session_state.llindar, forca=forca)
+
+    # ---- Resum breu de la IA -------------------------------------------------
+    if informe and informe["resum"]:
+        st.markdown("##### Què diuen les dades")
+        ui.callout("Resum de la IA", html.escape(informe["resum"]), "info")
+        st.button("Regenerar amb IA", on_click=_demana_regenerar, key="btn_regenera_ia")
+    elif informe is None:
+        ui.callout(
+            "La IA no ha pogut generar l'informe",
+            f"{html.escape(error_ia or 'Error desconegut')} · Es mostren les recomanacions bàsiques de l'anàlisi.",
+            "warn",
         )
+        st.button("Tornar-ho a provar", on_click=_demana_regenerar, key="btn_regenera_ia")
+
+    # ---- Solucions ---------------------------------------------------------------
+    if informe and informe.get("avisos"):
+        st.caption("⚠️ " + " · ".join(informe["avisos"]) + ". Es mostra l'anàlisi base on falta la IA.")
+        st.button("Tornar-ho a provar", on_click=_demana_regenerar, key="btn_regenera_ia2")
+
+    st.markdown("##### Solucions proposades")
+    if informe and informe["solucions"]:
+        for s in informe["solucions"]:
+            st.markdown(_targeta_solucio(s), unsafe_allow_html=True)
+        st.caption("Solucions generades per IA a partir de l'anàlisi. Són propostes: les valida i decideix People.")
+    else:
+        for _, row in recs.iterrows():
+            st.markdown(
+                f"<div class='callout' style='margin-bottom:0.6rem;border-left:4px solid #FAB626'>"
+                f"<div style='display:flex;justify-content:space-between;gap:1rem;align-items:center'>"
+                f"<div><b>{row['Prioritat']}. {row['Tema']}</b><br>"
+                f"<span style='font-size:0.92rem'>{row['Acció proposada']}</span><br>"
+                f"<span class='hint'>{row['Suport']}</span></div>"
+                f"<div style='text-align:right;min-width:170px'>"
+                f"{ui.pill('Impacte ' + row['Impacte'], 'green' if row['Impacte'] == 'Alt' else 'gold')}<br>"
+                f"{ui.pill('Esforç ' + row['Esforç'], 'grey')}<br>"
+                f"<span class='hint'>{row['Responsable']}</span></div></div></div>",
+                unsafe_allow_html=True,
+            )
+
+    # ---- Tancament del cicle ---------------------------------------------------
+    seg_ia = informe["seguiment"] if informe else None
+    proposta = (
+        {**proposta_base, **seg_ia}
+        if seg_ia and seg_ia["preguntes"] and seg_ia["motiu"]
+        else proposta_base
+    )
 
     st.markdown("##### Tancament del cicle")
     s1, s2 = st.columns([1.4, 1])
     with s1:
+        e = html.escape
         st.markdown(
             f"<div class='callout callout-info'>"
             f"<div class='callout-title'>Propera microconsulta proposada</div>"
-            f"<div style='font-size:1.05rem;font-weight:600;margin:0.25rem 0'>{proposta['titol']}</div>"
-            f"<div class='hint'>{proposta['motiu']}</div>"
-            + "".join(f"<div style='margin-top:0.35rem'>· {p}</div>" for p in proposta["preguntes"])
+            f"<div style='font-size:1.05rem;font-weight:600;margin:0.25rem 0'>{e(proposta['titol'])}</div>"
+            f"<div class='hint'>{e(proposta['motiu'])}</div>"
+            + "".join(f"<div style='margin-top:0.35rem'>· {e(p)}</div>" for p in proposta["preguntes"])
             + "</div>",
             unsafe_allow_html=True,
         )
@@ -1050,14 +1132,28 @@ def pagina_insights() -> None:
         )
         st.caption("S'obre el mateix flux de validació humana. Res es publica automàticament.")
 
+    # ---- Pla d'acció -----------------------------------------------------------
     st.markdown("##### Pla d'acció i seguiment")
-    pla = pd.DataFrame(
-        [
-            {"Horitzó": "0-30 dies", "Acció": recs.iloc[0]["Acció proposada"], "Responsable": recs.iloc[0]["Responsable"], "Indicador": "Taxa de resposta i valoració del tema"},
-            {"Horitzó": "30-60 dies", "Acció": recs.iloc[1]["Acció proposada"] if len(recs) > 1 else "—", "Responsable": recs.iloc[1]["Responsable"] if len(recs) > 1 else "—", "Indicador": "Evolució del sentiment al tema"},
-            {"Horitzó": "60-90 dies", "Acció": "Nova microconsulta de seguiment i comparació amb el període anterior", "Responsable": "People", "Indicador": "Delta de participació per col·lectiu"},
-        ]
-    )
+    if informe and informe["pla"]:
+        pla = pd.DataFrame(
+            [
+                {
+                    "Horitzó": str(p.get("horitzo", "—")),
+                    "Acció": str(p.get("accio", "—")),
+                    "Responsable": str(p.get("responsable", "—")),
+                    "Indicador": str(p.get("indicador", "—")),
+                }
+                for p in informe["pla"]
+            ]
+        )
+    else:
+        pla = pd.DataFrame(
+            [
+                {"Horitzó": "0-30 dies", "Acció": recs.iloc[0]["Acció proposada"], "Responsable": recs.iloc[0]["Responsable"], "Indicador": "Taxa de resposta i valoració del tema"},
+                {"Horitzó": "30-60 dies", "Acció": recs.iloc[1]["Acció proposada"] if len(recs) > 1 else "—", "Responsable": recs.iloc[1]["Responsable"] if len(recs) > 1 else "—", "Indicador": "Evolució del sentiment al tema"},
+                {"Horitzó": "60-90 dies", "Acció": "Nova microconsulta de seguiment i comparació amb el període anterior", "Responsable": "People", "Indicador": "Delta de participació per col·lectiu"},
+            ]
+        )
     st.dataframe(pla, width="stretch", hide_index=True)
 
     ui.callout(
@@ -1066,6 +1162,7 @@ def pagina_insights() -> None:
         "per comprovar si realment ha millorat la percepció del col·lectiu.",
         "ok",
     )
+
 
 
 # ---------------------------------------------------------------------------

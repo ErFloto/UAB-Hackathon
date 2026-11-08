@@ -139,7 +139,7 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
                 "Genera un conjunt de preguntes 100% originals, creatives i totalment personalitzades per a l'objectiu indicat. "
                 f" Tingues en compte que la mida de la consulta ha de ser {descripcio_durada} (no cal clavar un nombre exacte, però adapta't a aquesta extensió). "
                 "No utilitzis plantilles fixes. Varia els tipus de pregunta (pots usar 'Escala (1-5)', 'Opció múltiple', "
-                "'Sí / No' o 'Text obert'). "
+                "'Sí / No' o 'Text obert'). Es important que les opcions tinguin sentit i que segueixin les regles ortografiques del catala, es a dir la l·l geminada es un mateixa paraula, Importantisi Ejemplo tranquil·litat por mucho que se escriba tranquil · litat es una misma palabra"
                 "Has de retornar exclusivament un objecte JSON net, sense markdown addicional, amb aquesta estructura exacta:\n"
                 "{\n"
                 "   \"titol\": \"Títol original de la microconsulta\",\n"

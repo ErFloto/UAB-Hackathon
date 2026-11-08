@@ -1,49 +1,122 @@
 {
-    "titol": "El vent de bondat que es respira al teu equip",
-    "intro": "En aquest breu ripoll volem saber com et sents amb l'ambient que t'envolta al dia a dia. Sense judicis, només la teva veu.",
-    "objectiu": "bondia",
+    "titol": "Què valorem realment de la nostra feina?",
+    "intro": "Aquesta petita consulta vol ajudar-nos a entendre què és el que més valorar de la vostra feina, més allá dels aspectes materials. Les vostres respostes ens permetran conèixer millor el que us fa sentir-vos compromesos, motivats i a gust aquí. No hi ha respostes correctes ni incorrectes; només la vostra perspectiva. Gràcies per ajudar-nos a construir un lloc de treball millor, junts.",
+    "objectiu": "hola que valoreu mes de la feina",
     "col_lectiu": "General",
-    "context": "dia",
+    "context": "",
     "temes": [
         "Treball"
     ],
     "to": "Proper i directe",
-    "durada_max": 1,
-    "temps_estimat": 1,
+    "durada_max": 3,
+    "temps_estimat": 3,
     "canal": "Mòbil-QR",
     "logica": [],
     "preguntes": [
         {
             "id": "q1",
-            "text": "En quina mesura percebs que el respecte i la cura mutua es noten de veritat en les teves jornades?",
-            "tipus": "Escala (1-5)",
+            "text": "De totes les dimensions següents, quina és la que més valoreu de la vostra feina?",
+            "tipus": "Opció múltiple",
             "opcions": [
-                "1 - Gairebé gens",
-                "2 - Molt poc",
-                "3 - Una mica",
-                "4 - Molt",
-                "5 - Completament"
+                "El bon ambient i les relacions amb l'equip",
+                "La possibilitat de créixer i aprendre cada dia",
+                "L'autonomia per prendre decisions",
+                "El sentit i l'impacte del que fem",
+                "La segureitat i l'estabilitat del lloc",
+                "L'equilibri entre la feina i la vida personal"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q2",
-            "text": "Què fa que et senti acolitit i valorat en el teu dia a treball?",
-            "tipus": "Opció múltiple",
+            "text": "Del 1 al 5, com valoraries el grau en què el que feu té un sentit per a tu?",
+            "tipus": "Escala (1-5)",
             "opcions": [
-                "El tracte proper del companys",
-                "Sentir que la meva aportació compta",
-                "Un ambient tranquil i sense judicis",
-                "El recolzament en els moments difícils",
-                "La confiança recíproca"
+                "1 - Per res",
+                "2 - Gens",
+                "3 - Una mica",
+                "4 - Molt",
+                "5 - Per molt"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q3",
-            "text": "En una frase, com descriuries el clima que et fa sentir el teu entorn?",
+            "text": "Sents que el que feu contribueix a alguna cosa més gran que vosaltres mateixos?",
+            "tipus": "Sí / No",
+            "opcions": [
+                "Sí",
+                "No"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q4",
+            "text": "Com valoraries el teu equilibri entre la feina i la vida personal durant les últimes setmanes?",
+            "tipus": "Escala (1-5)",
+            "opcions": [
+                "1 - Gens equilibrat",
+                "2 - Més avall desequilibrat",
+                "3 - Equilibrat",
+                "4 - Més avall equilibrat",
+                "5 - Molt equilibrat"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q5",
+            "text": "Descriu amb les teves paraules un moment en què has sentit orgull de la teva feina.",
+            "tipus": "Text obert",
+            "opcions": [],
+            "obligatoria": false,
+            "condicional": ""
+        },
+        {
+            "id": "q6",
+            "text": "Quin tipus de reconeixement valoraries més per part del teu entorn de treball?",
+            "tipus": "Opció múltiple",
+            "opcions": [
+                "Paraules d'animació i agraïment",
+                "Reconeixement públic davant l'equip",
+                "Oportunitats de creixement professional",
+                "Major autonomia en les decisions",
+                "Responsabilitats i repteus noves"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q7",
+            "text": "Fins a quin punt et sents valorat pel teu i i el vostre i?",
+            "tipus": "Escala (1-5)",
+            "opcions": [
+                "1 - Gens valorat",
+                "2 - Gens valorat",
+                "3 - Mitjanament valorat",
+                "4 - Molt valorat",
+                "5 - Molt valorat"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q8",
+            "text": "Et sentiries còmode recomanar el nostre lloc de treball a un amic o amiga?",
+            "tipus": "Sí / No",
+            "opcions": [
+                "Sí",
+                "No"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q9",
+            "text": "Si pogueres canviar una sola cosa del teu entorn de feina, quina seria?",
             "tipus": "Text obert",
             "opcions": [],
             "obligatoria": false,
