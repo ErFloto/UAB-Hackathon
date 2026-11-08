@@ -1,8 +1,8 @@
 {
-    "titol": "Un minut per preguntar-te: com et sents?",
-    "intro": "A vegades el dia a dia corre i ensidlidem de parar un moment per mirar una mica cap a dins. Aquesta és una petita pausa, sense judicis, per saber com et trobes. Respon des de la teua veritat; les teues respostes són completament anònimes i m'ajuden a comprendre millor el benestar del col·lectiu.",
-    "objectiu": "com esteu",
-    "col_lectiu": "General",
+    "titol": "Com et sents a Logística?",
+    "intro": "Aquesta microconsulta és un petit espai per escuchar com et sents al teu entorn de treball. Amb només tres respostes ens ajudaràs a conèixer millor el dia a dia de tothom i a millorar-lo junts.",
+    "objectiu": "com estei",
+    "col_lectiu": "Logística",
     "context": "",
     "temes": [
         "Treball"
@@ -15,36 +15,32 @@
     "preguntes": [
         {
             "id": "q1",
-            "text": "Si haguessis de valorar, sense pensar-gi massa, com et sents vitalament aquesta setmana?",
+            "text": "En una escala del 1 al 5, com valoraries el clima de treball i la relació amb el teu equip a logística?",
             "tipus": "Escala (1-5)",
             "opcions": [
-                "1 - Molt cansat/a, sense energia",
-                "2 - Amb poca energia",
-                "3 - Ni bé, ni mal",
-                "4 - Amb energia raonable",
-                "5 - Amb molta energia i il·lusió"
+                "1 - Malt i amb tensions",
+                "3 - Acceptable, sense gran cosa",
+                "5 - Molt agradable i cohesive"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q2",
-            "text": "Què et mou més enllà del treball quan et sents en equilibri i en pau?",
+            "text": "Què t'ajuda més a mantenir la calma i l'eficiència durant els dies de més pressió?",
             "tipus": "Opció múltiple",
             "opcions": [
-                "Les relacions amb la gent que m'estima",
-                "El temps lliure i el descans",
-                "Fer esport o cuidar el cos",
-                "Un hobbie o alguna cosa creativa",
-                "La natura o estar a l'aire lliure",
-                "Sentir que el que faig té sentit"
+                "El treball en equip",
+                "Que els processos estiguen ben definits",
+                "La comunicació amb la coordinació",
+                "Disposar dels mitjans i equip necessaris"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q3",
-            "text": "A partir d'ara, què necessites que canviï o que es mantingui tal qual per sentir-te una mica millor?",
+            "text": "Si pogueres canviar una sola cosa del teu dia a dia a logística, quina seria i per què?",
             "tipus": "Text obert",
             "opcions": [],
             "obligatoria": false,

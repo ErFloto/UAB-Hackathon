@@ -30,6 +30,7 @@ import analisis
 import datos
 import ia
 import qrcode
+import qrs
 import respostes
 
 params = st.query_params
@@ -327,10 +328,14 @@ def panel_distribucion_encuesta(consulta: dict) -> None:
     # només funciona al mateix ordinador, no des d'un mòbil.
     base_url = os.getenv("PUBLIC_URL", "").strip().rstrip("/") or "http://localhost:8501"
     # El col·lectiu i el canal viatgen al QR (un QR per col·lectiu): la persona no s'identifica.
+    colectiu = consulta.get("col_lectiu", "General")
+    # Si la consulta ja és per a un col·lectiu concret, només es mostra el seu QR (amb la marca).
+    # Només si és «General» s'ofereix un QR per a cada col·lectiu.
+    un_sol_colectiu = colectiu in qrs.colectius_qr()
     url_publica = base_url + "/?" + urlencode(
         {
             "respondre": "true",
-            "col": consulta.get("col_lectiu", "General"),
+            "col": colectiu,
             "canal": consulta.get("canal", "Mòbil-QR"),
         }
     )
@@ -352,17 +357,18 @@ def panel_distribucion_encuesta(consulta: dict) -> None:
 
     with c2:
         st.markdown("###  Codi QR")
-        qr = qrcode.QRCode(version=1, box_size=10, border=4)
-        qr.add_data(url_publica)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        qr_bytes = buf.getvalue()
-        
+        qr_bytes = qrs.qr_png(url_publica, colectiu)  # amb el nom del col·lectiu a sota
         st.image(qr_bytes, use_container_width=True)
-        st.download_button("⬇️ Descarregar QR", data=qr_bytes, file_name="qr_enquesta.png", mime="image/png", use_container_width=True)
+        if un_sol_colectiu:
+            st.caption(f"Aquest QR és només per al col·lectiu **{colectiu}**.")
+        st.download_button(
+            "⬇️ Descarregar QR",
+            data=qr_bytes,
+            file_name=qrs.nom_fitxer(colectiu),
+            mime="image/png",
+            key="dl_qr_principal",
+            use_container_width=True,
+        )
 
     with c3:
         st.markdown("###  Etiqueta NFC")
@@ -371,6 +377,39 @@ def panel_distribucion_encuesta(consulta: dict) -> None:
         st.write("2. Tria **Escriure > Afegir registre > URL**.")
         st.write("3. Enganxa l'enllaç web.")
         st.write("4. Apropa el mòbil a l'etiqueta.")
+
+    if not un_sol_colectiu:
+        st.divider()
+        st.subheader("Un QR per col·lectiu")
+        st.caption(
+            "Cada QR duu el col·lectiu a l'enllaç: la persona no s'identifica, i així pots veure quins "
+            "col·lectius responen i quins no (Participació → representativitat). "
+            "Imprimeix cada QR on arribi aquest col·lectiu: planta, magatzem, oficina…"
+        )
+        llista_qrs = qrs.qrs_per_colectiu(base_url)
+        columnes = st.columns(3)
+        for i, q in enumerate(llista_qrs):
+            with columnes[i % 3]:
+                st.markdown(f"**{q['col']}** · {q['centre']}")
+                st.image(q["png"], use_container_width=True)
+                st.download_button(
+                    f"⬇️ QR {q['col']}",
+                    data=q["png"],
+                    file_name=q["fitxer"],
+                    mime="image/png",
+                    key=f"dl_qr_{q['col']}",
+                    use_container_width=True,
+                )
+                with st.expander("Enllaç"):
+                    st.code(q["url"], language="text")
+        st.download_button(
+            "⬇️ Descarregar tots els QR (ZIP)",
+            data=qrs.zip_qrs(llista_qrs),
+            file_name="qr_per_collectiu.zip",
+            mime="application/zip",
+            key="dl_qr_zip",
+            type="primary",
+        )
 
 def mostrar_formulario_final(consulta: dict) -> None:
     st.subheader("Vista prèvia interactiva del formulari")
