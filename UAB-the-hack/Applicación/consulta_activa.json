@@ -1,6 +1,6 @@
 {
-    "titol": "Com esteu, de veritat?",
-    "intro": "Una pausa curta per mirar cap a dins. Sense respontes correctes i sense jutjaments:olem saber com et sents de veritat. Respon amb honestitat, aquest és un moment per a tu.",
+    "titol": "Un minut per preguntar-te: com et sents?",
+    "intro": "A vegades el dia a dia corre i ensidlidem de parar un moment per mirar una mica cap a dins. Aquesta és una petita pausa, sense judicis, per saber com et trobes. Respon des de la teua veritat; les teues respostes són completament anònimes i m'ajuden a comprendre millor el benestar del col·lectiu.",
     "objectiu": "com esteu",
     "col_lectiu": "General",
     "context": "",
@@ -8,68 +8,43 @@
         "Treball"
     ],
     "to": "Proper i directe",
-    "durada_max": 2,
-    "temps_estimat": 2,
+    "durada_max": 1,
+    "temps_estimat": 1,
     "canal": "Mòbil-QR",
     "logica": [],
     "preguntes": [
         {
             "id": "q1",
-            "text": "En general, com et sents aquestes darreres setmanes?",
+            "text": "Si haguessis de valorar, sense pensar-gi massa, com et sents vitalament aquesta setmana?",
             "tipus": "Escala (1-5)",
             "opcions": [
-                "1 - Molt cansat/cansada",
-                "2 - Una mica cansat/cansada",
-                "3 - Regular",
-                "4 - Bé",
-                "5 - Molt bé"
+                "1 - Molt cansat/a, sense energia",
+                "2 - Amb poca energia",
+                "3 - Ni bé, ni mal",
+                "4 - Amb energia raonable",
+                "5 - Amb molta energia i il·lusió"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q2",
-            "text": "Què t'ha donat més energia i il·lusió aquestes darreres setmanes?",
+            "text": "Què et mou més enllà del treball quan et sents en equilibri i en pau?",
             "tipus": "Opció múltiple",
             "opcions": [
-                "El treball en equip",
-                "Aprendre alguna cosa nova",
-                "Les relacions amb les persones",
-                "Sentir que faig algo útil",
-                "El temps lliure fora del treball",
-                "Cap opció me la dona"
+                "Les relacions amb la gent que m'estima",
+                "El temps lliure i el descans",
+                "Fer esport o cuidar el cos",
+                "Un hobbie o alguna cosa creativa",
+                "La natura o estar a l'aire lliure",
+                "Sentir que el que faig té sentit"
             ],
             "obligatoria": true,
             "condicional": ""
         },
         {
             "id": "q3",
-            "text": "Aquestes darreres setmanes, sents que has tingut espai real per reposar?",
-            "tipus": "Sí / No",
-            "opcions": [
-                "Sí",
-                "No"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q4",
-            "text": "Com avalues el teu nivell de calma i tranquil·litat en el dia a dia?",
-            "tipus": "Escala (1-5)",
-            "opcions": [
-                "1 - Gairebé nul·la",
-                "2 - Poca",
-                "3 - Moderada",
-                "4 - Bastant",
-                "5 - Molt alta"
-            ],
-            "obligatoria": true,
-            "condicional": ""
-        },
-        {
-            "id": "q5",
-            "text": "Si poguessis canviar una cosa que afecti el teu benestar, què seria?",
+            "text": "A partir d'ara, què necessites que canviï o que es mantingui tal qual per sentir-te una mica millor?",
             "tipus": "Text obert",
             "opcions": [],
             "obligatoria": false,

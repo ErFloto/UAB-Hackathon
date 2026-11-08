@@ -16,6 +16,7 @@ import os
 import threading
 import uuid
 from datetime import date, timedelta
+import pii
 
 import pandas as pd
 
@@ -50,8 +51,8 @@ def desa_resposta(consulta: dict, respostes: dict, col: str | None, canal: str |
         for q in pregs
         if q.get("tipus") == "Text obert" and str(respostes.get(q["id"], "")).strip()
     )
-    net, detectats = datos.redacta_pii(obert)  # PII fora ABANS de desar
-
+    net, detectats = pii.redacta_pii(obert, usa_ia=True)   # antes: datos.redacta_pii(obert)
+    
     fila = {
         "id_resposta": f"live_{uuid.uuid4().hex[:8]}",
         "data": date.today().isoformat(),
