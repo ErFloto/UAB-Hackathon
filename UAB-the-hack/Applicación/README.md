@@ -39,6 +39,10 @@ ESCOLTA_API_KEY= "La teva API aqui"
 # Llindar mínim de respostes per segment (5-10)
 PRIVACY_THRESHOLD=15.0
 
+PUBLIC_URL="La vostra URL publica"
+
+ADMIN_PIN="Afegir el pin que vulguis, nomes numeros"
+
 
 ## Executar-ho en aquest dispositiu (Windows)
 
