@@ -23,7 +23,7 @@ la implementación de `api_client.py`, no la interfaz.
 | Campo | Valores |
 | --- | --- |
 | `collective` | `plant`, `logistics`, `commercial`, `office`, `manager` |
-| `channel` | `mobile_qr`, `email`, `teams` |
+| `channel` | `mobile_qr`, `email`, `nfc` |
 | `tone` | `close_direct`, `neutral_formal`, `motivating` |
 | `question.type` | `scale_1_5`, `single_choice`, `yes_no`, `open_text` |
 | `status` | `draft`, `approved`, `published`, `closed` |
@@ -228,7 +228,7 @@ Errores: `502 typeform_unavailable` → el frontend ofrece modo mock y QR local.
   "channels": [
     { "channel": "mobile_qr", "responses": 402 },
     { "channel": "email", "responses": 168 },
-    { "channel": "teams", "responses": 70 }
+    { "channel": "nfc", "responses": 70 }
   ],
   "alerts": [
     "Planta: 126 respostes (9.0% de resposta, 19.2 pp per sota).",
