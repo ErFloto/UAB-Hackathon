@@ -409,7 +409,19 @@ def pagina_nova_consulta() -> None:
     )
 
     if not publicada:
-        b1, b2, b3 = st.columns([1.2, 1.2, 2])
+        # Afegim una columna extra al principi (b0) i ajustem una mica les mides
+        b0, b1, b2, b3 = st.columns([1, 1.2, 1.2, 2])
+        
+        with b0:
+            # Botó per descartar-ho tot i fer una enquesta des de zero
+            if st.button("Nova consulta", width="stretch", type="primary"):
+                # Esborrem les dades clau que mantenen l'usuari en aquesta pantalla
+                st.session_state.pop("consulta", None)
+                st.session_state.pop("necessitat", None)
+                st.session_state.pop("editor_preguntes", None)
+                st.session_state.variacio = 0
+                st.rerun() # Això recarrega la pàgina i el torna al formulari inicial
+
         with b1:
             if st.button("Tornar a generar", width="stretch"):
                 st.session_state.variacio += 1
@@ -418,12 +430,14 @@ def pagina_nova_consulta() -> None:
                 )
                 st.session_state.pop("editor_preguntes", None)
                 st.rerun()
+                
         with b2:
             if st.button("Desar esborrany", width="stretch"):
                 nova = dict(consulta)
                 nova["preguntes"] = _df_a_preguntes(editat, consulta["preguntes"])
                 st.session_state.consulta = nova
                 st.toast("Esborrany desat")
+                
         with b3:
             aprovacio = st.checkbox(
                 "He revisat les preguntes i aprovo la publicació (control humà obligatori)."
