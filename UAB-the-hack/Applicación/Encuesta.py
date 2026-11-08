@@ -5,17 +5,18 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 import matplotlib
+import os
+import json
+import requests
 
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
-import os
+from datetime import datetime
 from dotenv import load_dotenv
 
-import json
-import requests
+
 
 # Carrega les variables del fitxer .env
 load_dotenv()
@@ -67,7 +68,7 @@ TIPUS_OBERT = "Text obert"
 # ---------------------------------------------------------------------------
 
 X_synthetic, y_synthetic = make_classification(
-    n_samples=200,
+    n_samples=500,
     n_features=25,
     n_informative=15,
     n_redundant=5,
