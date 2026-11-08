@@ -27,7 +27,7 @@ import os
 # Constants de domini
 # ---------------------------------------------------------------------------
 
-COL_LECTIUS = ["Planta", "Logística", "Comercial", "Oficina", "Manager"]
+COL_LECTIUS = ["General", "Planta", "Logística", "Comercial", "Oficina", "Manager"]
 
 # Població de referència (fictícia, només per calcular representativitat).
 POBLACIO = {
@@ -36,6 +36,7 @@ POBLACIO = {
     "Comercial": 500,
     "Oficina": 700,
     "Manager": 200,
+    "General": 3600,
 }
 
 CENTRES = {
@@ -44,6 +45,7 @@ CENTRES = {
     "Comercial": "Oficina",
     "Oficina": "Oficina",
     "Manager": "Oficina",
+    "General": "Tots"
 }
 
 CANALS = ["Mòbil-QR", "NFC", "Correu"]
@@ -144,6 +146,20 @@ PESOS_TEMA = {
         "Ambient i relacions": 6,
         "Organització i recursos": 7,
     },
+        "General": {
+        "Torns i horaris": 21,
+        "Descansos i pauses": 3,
+        "Càrrega de treball": 10,
+        "Comunicació": 13,
+        "Lideratge": 19,
+        "Reconeixement": 8,
+        "Conciliació": 10,
+        "Formació i desenvolupament": 13,
+        "Eines i processos": 7,
+        "Salut i seguretat": 9,
+        "Ambient i relacions": 6,
+        "Organització i recursos": 3,
+    },
 }
 
 SENTIMENT_BASE = {
@@ -167,6 +183,7 @@ AJUST_COL_LECTIU = {
     "Comercial": 0.05,
     "Oficina": 0.10,
     "Manager": 0.08,
+    "General": 0.08,
 }
 
 # ---------------------------------------------------------------------------
