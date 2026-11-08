@@ -1049,7 +1049,7 @@ PAGINA_FN[st.session_state.nav]()
 st.markdown("<div style='height:1.4rem'></div>", unsafe_allow_html=True)
 st.markdown(
     "<div style='text-align:center;color:#9A8A82;font-size:0.75rem'>"
-    "EscoltDamm · prototip de demo "
+    "EscoltDamm · Prototip de demo "
     "</div>",
     unsafe_allow_html=True,
 )
