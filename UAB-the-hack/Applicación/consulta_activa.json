@@ -1,0 +1,57 @@
+{
+    "titol": "El vent de bondat que es respira al teu equip",
+    "intro": "En aquest breu ripoll volem saber com et sents amb l'ambient que t'envolta al dia a dia. Sense judicis, només la teva veu.",
+    "objectiu": "bondia",
+    "col_lectiu": "General",
+    "context": "dia",
+    "temes": [
+        "Treball"
+    ],
+    "to": "Proper i directe",
+    "durada_max": 1,
+    "temps_estimat": 1,
+    "canal": "Mòbil-QR",
+    "logica": [],
+    "preguntes": [
+        {
+            "id": "q1",
+            "text": "En quina mesura percebs que el respecte i la cura mutua es noten de veritat en les teves jornades?",
+            "tipus": "Escala (1-5)",
+            "opcions": [
+                "1 - Gairebé gens",
+                "2 - Molt poc",
+                "3 - Una mica",
+                "4 - Molt",
+                "5 - Completament"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q2",
+            "text": "Què fa que et senti acolitit i valorat en el teu dia a treball?",
+            "tipus": "Opció múltiple",
+            "opcions": [
+                "El tracte proper del companys",
+                "Sentir que la meva aportació compta",
+                "Un ambient tranquil i sense judicis",
+                "El recolzament en els moments difícils",
+                "La confiança recíproca"
+            ],
+            "obligatoria": true,
+            "condicional": ""
+        },
+        {
+            "id": "q3",
+            "text": "En una frase, com descriuries el clima que et fa sentir el teu entorn?",
+            "tipus": "Text obert",
+            "opcions": [],
+            "obligatoria": false,
+            "condicional": ""
+        }
+    ],
+    "estat": "Publicada",
+    "qr": null,
+    "enllac": "",
+    "publicada_el": ""
+}

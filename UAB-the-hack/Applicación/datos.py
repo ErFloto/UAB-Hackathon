@@ -755,13 +755,13 @@ def generar_respostes(n: int = 640, seed: int = 42) -> pd.DataFrame:
 
         # Canal coherent amb el col·lectiu.
         if collectiu in ("Planta", "Logística"):
-            canal = rng.choices(["Mòbil-QR", "Correu"], weights=[0.88, 0.09, 0.03], k=1)[0]
+            canal = rng.choices(["Mòbil-QR", "Correu","NFC"], weights=[0.88, 0.09, 0.03], k=1)[0]
         elif collectiu == "Comercial":
-            canal = rng.choices(["Mòbil-QR", "Correu"], weights=[0.55, 0.35, 0.10], k=1)[0]
+            canal = rng.choices(["Mòbil-QR", "Correu","NFC"], weights=[0.55, 0.35, 0.10], k=1)[0]
         elif collectiu == "Oficina":
-            canal = rng.choices(["Mòbil-QR", "Correu"], weights=[0.18, 0.52, 0.30], k=1)[0]
+            canal = rng.choices(["Mòbil-QR", "Correu","NFC"], weights=[0.18, 0.52, 0.30], k=1)[0]
         else:
-            canal = rng.choices(["Mòbil-QR", "Correu"], weights=[0.10, 0.35, 0.55], k=1)[0]
+            canal = rng.choices(["Mòbil-QR", "Correu","NFC"], weights=[0.10, 0.35, 0.55], k=1)[0]
 
         registres.append(
             {

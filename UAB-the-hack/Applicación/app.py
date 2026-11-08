@@ -30,7 +30,10 @@ if MODO_RESPOTA:
     import json
     st.markdown("<div style='max-width: 600px; margin: auto; padding-top: 2rem;'>", unsafe_allow_html=True)
     
-    # Intentem carregar l'enquesta des del fitxer JSON local
+    # Comprovem si ja ha respost en aquesta sessió
+    if "enquesta_enviada" not in st.session_state:
+        st.session_state.enquesta_enviada = False
+
     consulta_activa = None
     try:
         with open("consulta_activa.json", "r", encoding="utf-8") as f:
@@ -38,7 +41,6 @@ if MODO_RESPOTA:
     except Exception:
         consulta_activa = None
 
-    # Fallback per si no s'ha creat el fitxer encara
     if not consulta_activa:
         consulta_activa = {
             "titol": "Microconsulta UAB The Hack",
@@ -51,36 +53,43 @@ if MODO_RESPOTA:
     st.title(consulta_activa.get("titol", "Enquesta"))
     st.info(consulta_activa.get("intro", "T'agraïm la participació."))
 
-    with st.form("formulari_public_exterior", clear_on_submit=True):
-        respostes_usuari = {}
-        preguntes = consulta_activa.get("preguntes", [])
-        
-        for i, q in enumerate(preguntes):
-            obligatoria = "*(Obligatòria)*" if q.get("obligatoria") else ""
-            st.markdown(f"**{i+1}. {q.get('text')}** {obligatoria}")
+    # Si JA ha respost, mostrem només el missatge d'èxit i blockejem un altre enviament
+    if st.session_state.enquesta_enviada:
+        st.success("✅ Ja has respost aquesta consulta anteriorment. Moltes gràcies per la teva participació anònima!")
+        st.balloons()
+    else:
+        # Si NO ha respost, mostrem el formulari
+        with st.form("formulari_public_exterior", clear_on_submit=True):
+            respostes_usuari = {}
+            preguntes = consulta_activa.get("preguntes", [])
             
-            tipus = q.get("tipus", "Text obert")
-            q_id = q.get("id", f"q_{i}")
-            
-            if tipus == Encuesta.TIPUS_ESCALA:
-                respostes_usuari[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], horizontal=True, key=f"ext_{q_id}_{i}")
-            elif tipus == Encuesta.TIPUS_SI_NO:
-                respostes_usuari[q_id] = st.radio("Sí/No", ["Sí", "No"], horizontal=True, key=f"ext_{q_id}_{i}")
-            elif tipus == Encuesta.TIPUS_OPCIONS:
-                opcions = q.get("opcions", ["Opció 1", "Opció 2"])
-                if not opcions:
-                    opcions = ["Opció 1", "Opció 2"]
-                respostes_usuari[q_id] = st.radio("Tria una opció", opcions, key=f"ext_{q_id}_{i}")
-            else:
-                respostes_usuari[q_id] = st.text_area("Escriu la teva resposta...", key=f"ext_{q_id}_{i}")
-            
-            st.write("---")
-            
-        enviat = st.form_submit_button("Enviar respostes", type="primary", use_container_width=True)
-        if enviat:
-            st.success("🎉 Moltes gràcies! Les teves respostes s'han registrat correctament.")
-            st.balloons()
-            
+            for i, q in enumerate(preguntes):
+                obligatoria = "*(Obligatòria)*" if q.get("obligatoria") else ""
+                st.markdown(f"**{i+1}. {q.get('text')}** {obligatoria}")
+                
+                tipus = q.get("tipus", "Text obert")
+                q_id = q.get("id", f"q_{i}")
+                
+                if tipus == Encuesta.TIPUS_ESCALA:
+                    respostes_usuari[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], horizontal=True, key=f"ext_{q_id}_{i}")
+                elif tipus == Encuesta.TIPUS_SI_NO:
+                    respostes_usuari[q_id] = st.radio("Sí/No", ["Sí", "No"], horizontal=True, key=f"ext_{q_id}_{i}")
+                elif tipus == Encuesta.TIPUS_OPCIONS:
+                    opcions = q.get("opcions", ["Opció 1", "Opció 2"])
+                    if not opcions:
+                        opcions = ["Opció 1", "Opció 2"]
+                    respostes_usuari[q_id] = st.radio("Tria una opció", opcions, key=f"ext_{q_id}_{i}")
+                else:
+                    respostes_usuari[q_id] = st.text_area("Escriu la teva resposta...", key=f"ext_{q_id}_{i}")
+                
+                st.write("---")
+                
+            enviat = st.form_submit_button("Enviar respostes", type="primary", use_container_width=True)
+            if enviat:
+                # Canviem l'estat a True i recarreguem la pàgina
+                st.session_state.enquesta_enviada = True
+                st.rerun()
+                
     st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
         
