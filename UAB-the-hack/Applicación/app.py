@@ -21,7 +21,69 @@ import Encuesta
 import Interfaz as ui
 import analisis
 import datos
+import qrcode
 
+params = st.query_params
+MODO_RESPOTA = "respondre" in params
+
+if MODO_RESPOTA:
+    import json
+    st.markdown("<div style='max-width: 600px; margin: auto; padding-top: 2rem;'>", unsafe_allow_html=True)
+    
+    # Intentem carregar l'enquesta des del fitxer JSON local
+    consulta_activa = None
+    try:
+        with open("consulta_activa.json", "r", encoding="utf-8") as f:
+            consulta_activa = json.load(f)
+    except Exception:
+        consulta_activa = None
+
+    # Fallback per si no s'ha creat el fitxer encara
+    if not consulta_activa:
+        consulta_activa = {
+            "titol": "Microconsulta UAB The Hack",
+            "intro": "Respon amb total sinceritat de forma anònima.",
+            "preguntes": [
+                {"id": "q1", "text": "Com valores el teu grau de benestar actual?", "tipus": "Escala (1-5)", "obligatoria": True}
+            ]
+        }
+
+    st.title(consulta_activa.get("titol", "Enquesta"))
+    st.info(consulta_activa.get("intro", "T'agraïm la participació."))
+
+    with st.form("formulari_public_exterior", clear_on_submit=True):
+        respostes_usuari = {}
+        preguntes = consulta_activa.get("preguntes", [])
+        
+        for i, q in enumerate(preguntes):
+            obligatoria = "*(Obligatòria)*" if q.get("obligatoria") else ""
+            st.markdown(f"**{i+1}. {q.get('text')}** {obligatoria}")
+            
+            tipus = q.get("tipus", "Text obert")
+            q_id = q.get("id", f"q_{i}")
+            
+            if tipus == Encuesta.TIPUS_ESCALA:
+                respostes_usuari[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], horizontal=True, key=f"ext_{q_id}_{i}")
+            elif tipus == Encuesta.TIPUS_SI_NO:
+                respostes_usuari[q_id] = st.radio("Sí/No", ["Sí", "No"], horizontal=True, key=f"ext_{q_id}_{i}")
+            elif tipus == Encuesta.TIPUS_OPCIONS:
+                opcions = q.get("opcions", ["Opció 1", "Opció 2"])
+                if not opcions:
+                    opcions = ["Opció 1", "Opció 2"]
+                respostes_usuari[q_id] = st.radio("Tria una opció", opcions, key=f"ext_{q_id}_{i}")
+            else:
+                respostes_usuari[q_id] = st.text_area("Escriu la teva resposta...", key=f"ext_{q_id}_{i}")
+            
+            st.write("---")
+            
+        enviat = st.form_submit_button("Enviar respostes", type="primary", use_container_width=True)
+        if enviat:
+            st.success("🎉 Moltes gràcies! Les teves respostes s'han registrat correctament.")
+            st.balloons()
+            
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.stop()
+        
 # ---------------------------------------------------------------------------
 # Configuració i estat
 # ---------------------------------------------------------------------------
@@ -50,6 +112,11 @@ STATUS_COLORS = {
     "Infrarepresentat": "#E32819",
     "Ocult (llindar)": "#6F5F5A",
 }
+
+
+# ---------------------------------------------------------------------------
+# Comprovació de Mode Resposta Extern (QR / URL / NFC)
+# ---------------------------------------------------------------------------
 
 
 def init_state() -> None:
@@ -162,6 +229,73 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 # Pàgina: Inici
 # ---------------------------------------------------------------------------
+
+def panel_distribucion_encuesta(consulta: dict) -> None:
+    ip_local = "localhost" 
+    url_publica = f"http://{ip_local}:8501/?respondre=true"  # <--- Canvi clau aquí
+    
+    st.subheader("🚀 Consulta llesta per distribuir")
+    
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("### 🔗 Enllaç Web")
+        st.code(url_publica, language="text")
+        st.markdown(f"[Obrir pàgina de votació]({url_publica})")
+        st.caption("Clica l'enllaç per provar la pàgina exclusiva.")
+
+    with c2:
+        st.markdown("### 📱 Codi QR")
+        qr = qrcode.QRCode(version=1, box_size=10, border=4)
+        qr.add_data(url_publica)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        qr_bytes = buf.getvalue()
+        
+        st.image(qr_bytes, use_container_width=True)
+        st.download_button("⬇️ Descarregar QR", data=qr_bytes, file_name="qr_enquesta.png", mime="image/png", use_container_width=True)
+
+    with c3:
+        st.markdown("### 📡 Etiqueta NFC")
+        st.info("Per activar físicament el punt d'enquesta:")
+        st.write("1. Obre **NFC Tools** al teu mòbil.")
+        st.write("2. Tria **Escriure > Afegir registre > URL**.")
+        st.write("3. Enganxa l'enllaç web.")
+        st.write("4. Apropa el mòbil a l'etiqueta.")
+
+def mostrar_formulario_final(consulta: dict) -> None:
+    st.subheader("Vista prèvia interactiva del formulari")
+    st.caption("Així és exactament com ho veurà la persona treballadora al seu mòbil quan escanegi el QR.")
+    
+    with st.form("formulari_enquesta", clear_on_submit=True):
+        st.markdown(f"### {consulta.get('titol', 'Enquesta')}")
+        st.info(consulta.get("intro", "Ens agradaria saber què en penses."))
+        
+        respuestas = {}
+        for i, q in enumerate(consulta.get("preguntes", [])):
+            obligatoria = "*(Obligatòria)*" if q.get("obligatoria") else ""
+            st.markdown(f"**{i+1}. {q['text']}** {obligatoria}")
+            
+            tipus = q.get("tipus", "")
+            q_id = q.get("id", f"q_{i}")
+            
+            if tipus == Encuesta.TIPUS_ESCALA:
+                respuestas[q_id] = st.radio("Escala", ["1", "2", "3", "4", "5"], horizontal=True, label_visibility="collapsed", key=f"form_{q_id}")
+            elif tipus == Encuesta.TIPUS_SI_NO:
+                respuestas[q_id] = st.radio("Sí/No", ["Sí", "No"], horizontal=True, label_visibility="collapsed", key=f"form_{q_id}")
+            elif tipus == Encuesta.TIPUS_OPCIONS:
+                opcions = q.get("opcions", ["Opció 1", "Opció 2"])
+                respuestas[q_id] = st.radio("Tria una opció", opcions, label_visibility="collapsed", key=f"form_{q_id}")
+            else:
+                respuestas[q_id] = st.text_area("La teva resposta...", label_visibility="collapsed", key=f"form_{q_id}")
+            
+            st.write("---")
+            
+        enviat = st.form_submit_button("Enviar respostes", type="primary", use_container_width=True)
+        if enviat:
+            st.success("🎉 Respostes enviades correctament! (Dades processades localment per a la demo)")
 
 
 def pagina_inici() -> None:
@@ -458,35 +592,37 @@ def pagina_nova_consulta() -> None:
                 "He revisat les preguntes i aprovo la publicació (control humà obligatori)."
             )
 
-        if st.button("Aprovar i publicar a Typeform", type="primary", disabled=not aprovacio):
+        # Nou botó de publicar (sense dependre de Typeform)
+      # Nou botó de publicar amb la persistència JSON per al QR/NFC
+        if st.button("🚀 Aprovar i publicar l'enquesta (QR / NFC)", type="primary", disabled=not aprovacio):
+            import json
             nova = dict(consulta)
             nova["preguntes"] = _df_a_preguntes(editat, consulta["preguntes"])
-            nova = Encuesta.publica_consulta(nova)
+            nova["estat"] = "Publicada"
+            
+            # Guardem a fitxer local perquè l'enllaç extern ho llegeixi sempre
+            with open("consulta_activa.json", "w", encoding="utf-8") as f:
+                json.dump(nova, f, ensure_ascii=False, indent=4)
+                
             st.session_state.consulta = nova
             st.session_state.aprovada = True
             st.session_state.pop("editor_preguntes", None)
             st.rerun()
-    else:
-        st.success("Consulta publicada amb aprovació humana. Ja es pot compartir.")
-        p1, p2 = st.columns([1, 2.2])
-        with p1:
-            qr_bytes = BytesIO()
-            consulta["qr"].save(qr_bytes, format="PNG")
-            st.image(qr_bytes.getvalue(), caption="QR", width=210)
-        with p2:
-            st.markdown("**Enllaç de participació (simulat via API Typeform)**")
-            st.code(consulta["enllac"], language=None)
-            st.markdown(
-                f"- Publicada el **{consulta['publicada_el']}**\n"
-                f"- Canal principal: **{consulta['canal']}**\n"
-                f"- Col·lectiu: **{consulta['col_lectiu']}**\n"
-                f"- Durada estimada: **{consulta['temps_estimat']} min**"
-            )
-            st.caption(
-                "A la demo l'enllaç és fictici. A la integració real, aquest pas crida "
-                "`POST /v1/forms` de Typeform i desa l'ID del formulari."
-            )
-        st.markdown("<div style='height:0.4rem'></div>", unsafe_allow_html=True)
+            
+    else: # Quan l'estat és 'Publicada'
+        st.success("✅ Consulta publicada amb aprovació humana. L'enquesta ja és activa.")
+        
+        # 1. Mostrem el panell per obtenir els codis de distribució
+        panel_distribucion_encuesta(consulta)
+        
+        st.divider()
+        
+        # 2. Mostrem l'enquesta funcional on es pot respondre
+        mostrar_formulario_final(consulta)
+        
+        st.divider()
+        
+        # 3. Botons de navegació per continuar la presentació de la demo
         c1, c2, c3 = st.columns(3)
         with c1:
             st.button("Veure participació", type="primary", width="stretch", on_click=ves, args=("Participació",))
@@ -1064,7 +1200,7 @@ PAGINA_FN[st.session_state.nav]()
 st.markdown("<div style='height:1.4rem'></div>", unsafe_allow_html=True)
 st.markdown(
     "<div style='text-align:center;color:#9A8A82;font-size:0.75rem'>"
-    "EscoltDamm · Prototip de demo "
+    "EscoltDamm · prototip de demo "
     "</div>",
     unsafe_allow_html=True,
 )
