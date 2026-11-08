@@ -315,7 +315,7 @@ def pagina_nova_consulta() -> None:
         with st.form("form_necessitat"):
             objectiu = st.text_area(
                 "Què vols entendre?",
-                value="Vull entendre com està afectant el nou sistema de torns a planta i què cal reforçar.",
+                value="Escriu de que vols que sigui l'enquesta.",
                 height=92,
                 help="Descriu l'objectiu en llenguatge natural. La IA el convertirà en preguntes.",
             )
@@ -325,7 +325,7 @@ def pagina_nova_consulta() -> None:
                 durada = st.select_slider("Durada màxima", options=["Curt", "Moderat", "Llarg"])
                 canal = st.selectbox("Canal principal", datos.CANALS, index=0)
             with col2:
-                context = st.text_input("Context (opcional)", value="Nou sistema de torns · octubre 2026")
+                context = st.text_input("Context (opcional)", value="")
                 to = st.radio("To de la consulta", list(Encuesta.TONS.keys()), horizontal=False)
                 prohibits = st.multiselect(
                     "Temes que NO s'han de preguntar",
