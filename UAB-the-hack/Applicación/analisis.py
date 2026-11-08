@@ -29,17 +29,28 @@ def marge_error(n: int, poblacio: int, z: float = 1.96) -> float:
     return round(moe * 100, 1)
 
 
-# Mínim absolut per protegir l'anonimat (cites, senyals febles i talls filtrats).
+# LLINDAR ÚNIC DE PRIVACITAT.
+#   - Es defineix com a % de la població de cada col·lectiu (LLINDAR_PCT_DEFECTE, o PRIVACY_THRESHOLD_PCT al .env).
+#   - ANONIMAT_MIN és el sòl absolut (la guia demana 5-10 respostes): mai es baixa d'aquí,
+#     encara que el % doni un nombre menor. També s'aplica als talls filtrats, cites i senyals febles.
+#   - Un col·lectiu per sota del llindar s'oculta del tot (resultats, totals i taxes).
 ANONIMAT_MIN = 8
-# Objectiu de resposta per col·lectiu, com a % de la seva població.
-# Per sota de l'objectiu el col·lectiu es mostra amb avís; només s'oculta
-# si té menys de ANONIMAT_MIN respostes (privacitat).
-LLINDAR_PCT_DEFECTE = 15
+LLINDAR_PCT_DEFECTE = 4
 
 
 def llindar_colectiu(col: str, llindar_pct: float = LLINDAR_PCT_DEFECTE) -> int:
-    """Respostes objectiu d'un col·lectiu: llindar_pct % de la seva població."""
-    return math.ceil(POBLACIO[col] * llindar_pct / 100)
+    """Respostes mínimes d'un col·lectiu: llindar_pct % de la seva població, amb sòl ANONIMAT_MIN."""
+    if col == "General":   # no és un col·lectiu real (respostes sense col·lectiu): només el sòl absolut
+        return ANONIMAT_MIN
+    return max(ANONIMAT_MIN, math.ceil(POBLACIO[col] * llindar_pct / 100))
+
+
+def colectius_ocults_privacitat(df: pd.DataFrame, llindar_pct: float = LLINDAR_PCT_DEFECTE) -> list[str]:
+    """Col·lectius amb menys respostes que el llindar únic de privacitat."""
+    return [
+        col for col in POBLACIO
+        if (df["col·lectiu"] == col).sum() < llindar_colectiu(col, llindar_pct)
+    ]
 
 
 def taula_participacio(df: pd.DataFrame, llindar_pct: float = LLINDAR_PCT_DEFECTE) -> pd.DataFrame:
@@ -55,9 +66,9 @@ def taula_participacio(df: pd.DataFrame, llindar_pct: float = LLINDAR_PCT_DEFECT
         pes_poblacio = poblacio / total_poblacio * 100
         desviacio = pes_mostra - pes_poblacio
         minim = llindar_colectiu(col, llindar_pct)
-        if n < ANONIMAT_MIN:
+        if n < minim:
             estat = "Ocult (llindar)"
-        elif n < minim or desviacio <= -5:
+        elif desviacio <= -5:
             estat = "Infrarepresentat"
         elif desviacio >= 5:
             estat = "Sobre-representat"
@@ -86,7 +97,7 @@ def alertes_representativitat(taula: pd.DataFrame) -> list[str]:
         if row["Estat"] == "Infrarepresentat":
             alertes.append(
                 f"{row['Col·lectiu']}: {row['Respostes']} respostes "
-                f"({row['Taxa resposta']}% de resposta; l'objectiu són {row['Mínim']})."
+                f"({row['Pes mostra']}% de la mostra davant del {row['Pes població']}% de la població)."
             )
         elif row["Estat"] == "Ocult (llindar)":
             alertes.append(

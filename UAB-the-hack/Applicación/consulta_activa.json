@@ -1,8 +1,8 @@
 {
-    "titol": "Com et sents a Logística?",
-    "intro": "Aquesta microconsulta és un petit espai per escuchar com et sents al teu entorn de treball. Amb només tres respostes ens ajudaràs a conèixer millor el dia a dia de tothom i a millorar-lo junts.",
-    "objectiu": "com estei",
-    "col_lectiu": "Logística",
+    "titol": "Com et sents avui, de veritat?",
+    "intro": "Para un moment i respira. Aquesta consulta és un petit espai sincer per saber com et sents, sense cap mena de valoració ni pressió. Respon tal com et ve de cor; el que diguis realment m'importa.",
+    "objectiu": "com esteu",
+    "col_lectiu": "General",
     "context": "",
     "temes": [
         "Treball"
@@ -10,40 +10,47 @@
     "to": "Proper i directe",
     "durada_max": 1,
     "temps_estimat": 1,
-    "canal": "Mòbil-QR",
+    "canal": "Teams",
     "logica": [],
     "preguntes": [
         {
             "id": "q1",
-            "text": "En una escala del 1 al 5, com valoraries el clima de treball i la relació amb el teu equip a logística?",
+            "text": "Quan penses en començar la teva jornada, en quina mesura et sents tranquil·lit i en pau?",
             "tipus": "Escala (1-5)",
             "opcions": [
-                "1 - Malt i amb tensions",
-                "3 - Acceptable, sense gran cosa",
-                "5 - Molt agradable i cohesive"
+                "1 - Gairebé mai, em sento tenso",
+                "3 - Mica a mica, una mica equilibrat",
+                "5 - Plenament tranquil·lit i en pau"
             ],
             "obligatoria": true,
+            "dimensio": "benestar",
             "condicional": ""
         },
         {
             "id": "q2",
-            "text": "Què t'ajuda més a mantenir la calma i l'eficiència durant els dies de més pressió?",
+            "text": "Què és el que més t'ha agradat o donat energia avui?",
             "tipus": "Opció múltiple",
             "opcions": [
-                "El treball en equip",
-                "Que els processos estiguen ben definits",
-                "La comunicació amb la coordinació",
-                "Disposar dels mitjans i equip necessaris"
+                "Una conversa agradable amb un company",
+                "Tancar una treva important",
+                "Un moment de calma per respirar",
+                "Ajudar o acompanyar algú de l'equip",
+                "Cap, un dia com qualsevol"
             ],
-            "obligatoria": true,
+            "obligatoria": false,
+            "dimensio": "",
             "condicional": ""
         },
         {
             "id": "q3",
-            "text": "Si pogueres canviar una sola cosa del teu dia a dia a logística, quina seria i per què?",
-            "tipus": "Text obert",
-            "opcions": [],
+            "text": "Et permetes fer una pausa petita per tu durant la jornada?",
+            "tipus": "Sí / No",
+            "opcions": [
+                "Sí",
+                "No"
+            ],
             "obligatoria": false,
+            "dimensio": "",
             "condicional": ""
         }
     ],

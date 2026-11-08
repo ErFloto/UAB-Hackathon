@@ -32,6 +32,7 @@ import ia
 import qrcode
 import qrs
 import respostes
+import teams
 
 params = st.query_params
 MODO_RESPOTA = "respondre" in params
@@ -62,6 +63,11 @@ if MODO_RESPOTA:
 
     st.title(consulta_activa.get("titol", "Enquesta"))
     st.info(consulta_activa.get("intro", "T'agraïm la participació."))
+    st.caption(
+        f"🔒 Aquesta consulta és **anònima**. No es desa el teu nom, IP ni dispositiu. Els comentaris passen per un filtre "
+        f"que elimina dades personals abans de guardar-se. Els resultats només es mostren **agregats**, i només quan hi ha "
+        f"prou respostes del teu col·lectiu perquè ningú pugui ser identificat. Les respostes s'esborren als {respostes.DIES_MAX} dies."
+    )
 
     # Si JA ha respost, mostrem només el missatge d'èxit i blockejem un altre enviament
     if st.session_state.enquesta_enviada:
@@ -204,11 +210,20 @@ STATUS_COLORS = {
 # ---------------------------------------------------------------------------
 
 
+def _llindar_inicial() -> int:
+    """Llindar de privacitat (% de la població per col·lectiu): PRIVACY_THRESHOLD_PCT del .env, entre 1 i 10."""
+    try:
+        v = float(os.getenv("PRIVACY_THRESHOLD_PCT", analisis.LLINDAR_PCT_DEFECTE))
+    except ValueError:
+        v = analisis.LLINDAR_PCT_DEFECTE
+    return int(min(10, max(1, round(v))))
+
+
 def init_state() -> None:
     valors = {
         "seed": 42,
         "n_respostes": 640,
-        "llindar": analisis.LLINDAR_PCT_DEFECTE,
+        "llindar": _llindar_inicial(),
         "nav": "Inici",
         "necessitat": None,
         "consulta": None,
@@ -231,8 +246,12 @@ def carrega_dades(seed: int, n: int) -> pd.DataFrame:
 _base_sintetica = carrega_dades(st.session_state.seed, st.session_state.n_respostes)
 # Respostes en directe (formulari QR) guardades a respostes_reals.csv; s'afegeixen a les sintètiques.
 _reals = respostes.carrega_reals()
-df_global = pd.concat([_base_sintetica, _reals], ignore_index=True) if not _reals.empty else _base_sintetica
+_df_brut = pd.concat([_base_sintetica, _reals], ignore_index=True) if not _reals.empty else _base_sintetica
 llindar = st.session_state.llindar
+# Privacitat: els col·lectius per sota del llindar únic surten de TOTES les dades (totals inclosos),
+# així no es poden deduir restant el total global menys els segments visibles.
+COLECTIUS_PRIVATS = analisis.colectius_ocults_privacitat(_df_brut, llindar)
+df_global = _df_brut[~_df_brut["col·lectiu"].isin(COLECTIUS_PRIVATS)].reset_index(drop=True)
 
 
 def colectius_amagats() -> list[str]:
@@ -293,7 +312,8 @@ with st.sidebar:
         f"2 períodes · seed {st.session_state.seed}</div>",
         unsafe_allow_html=True,
     )
-    st.slider("Objectiu de resposta per col·lectiu (% de la població)", 5, 25, key="llindar", format="%d%%")
+    st.slider("Llindar de privacitat (% de la població de cada col·lectiu)", 1, 10, key="llindar", format="%d%%",
+              help=f"Un col·lectiu per sota s'oculta del tot. Mai per sota de {analisis.ANONIMAT_MIN} respostes.")
     st.toggle(
         "Mostrar col·lectius per sota de l'objectiu",
         value=True,
@@ -377,6 +397,30 @@ def panel_distribucion_encuesta(consulta: dict) -> None:
         st.write("2. Tria **Escriure > Afegir registre > URL**.")
         st.write("3. Enganxa l'enllaç web.")
         st.write("4. Apropa el mòbil a l'etiqueta.")
+
+    st.divider()
+    st.subheader("Publicar a Microsoft Teams")
+    url_teams = base_url + "/?" + urlencode({"respondre": "true", "col": colectiu, "canal": "Teams"})
+    payload_teams = teams.construeix_payload(consulta, url_teams, colectiu)
+    targeta = payload_teams["attachments"][0]["content"]
+    t1, t2 = st.columns([1.2, 1])
+    with t1:
+        with st.container(border=True):
+            st.markdown(f"**{targeta['body'][0]['text']}**")
+            st.write(targeta["body"][1]["text"])
+            st.caption(targeta["body"][2]["text"])
+            st.link_button("Respondre ara", url_teams)
+        st.caption("Així es veuria la targeta al canal de Teams.")
+    with t2:
+        if teams.url_configurada():
+            st.success("Webhook de Teams configurat (Workflows).")
+        else:
+            st.info("Mode simulat: no hi ha `TEAMS_WEBHOOK_URL` al `.env`, així que no s'envia res.")
+        if st.button("Publicar a Teams", key="btn_teams", type="primary", use_container_width=True):
+            enviat, missatge = teams.envia(payload_teams)
+            (st.success if enviat else st.warning)(missatge)
+        with st.expander("Veure el missatge (JSON)"):
+            st.json(payload_teams)
 
     if not un_sol_colectiu:
         st.divider()
@@ -1327,7 +1371,7 @@ def pagina_privacitat() -> None:
         ui.callout("Control humà", "La IA proposa consultes i recomanacions; les persones validen abans de publicar i actuar.", "ok")
 
     st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
-    ui.seccio("Configuració", "Llindar mínim de mostra", "Prova com canvien els avisos en moure l'objectiu de resposta (% de la població de cada col·lectiu).")
+    ui.seccio("Configuració", "Llindar mínim de mostra", f"Un únic llindar, en % de la població de cada col·lectiu, amb un sòl de {analisis.ANONIMAT_MIN} respostes. Sota el llindar el col·lectiu s'oculta del tot (també dels totals).")
 
     if "llindar_privacy" not in st.session_state:
         st.session_state.llindar_privacy = st.session_state.llindar
@@ -1336,20 +1380,19 @@ def pagina_privacitat() -> None:
         st.session_state.llindar = int(st.session_state.llindar_privacy)
 
     st.slider(
-        "Objectiu de taxa de resposta per col·lectiu (% de la població)",
-        5,
-        25,
+        "Llindar de privacitat per col·lectiu (% de la població)",
+        1,
+        10,
         key="llindar_privacy",
         on_change=_canvia_llindar,
         format="%d%%",
     )
 
-    taula = analisis.taula_participacio(df_global, st.session_state.llindar)
-    sota = taula[taula["Respostes"] < taula["Mínim"]]
-    ocults = taula[taula["Respostes"] < analisis.ANONIMAT_MIN]
+    mins = ", ".join(f"{c} ≥ {analisis.llindar_colectiu(c, st.session_state.llindar)}" for c in datos.POBLACIO if c != "General")
     st.markdown(
-        f"Amb l'objectiu actual, **{len(sota)} col·lectius** quedarien per sota i es mostrarien amb avís. "
-        f"Ocults per privacitat (menys de {analisis.ANONIMAT_MIN} respostes): **{len(ocults)}**."
+        f"Amb el llindar actual (**{st.session_state.llindar}%**) cal tenir com a mínim: {mins}. "
+        f"Col·lectius ocults per privacitat: **{len(COLECTIUS_PRIVATS)}**"
+        + (f" ({', '.join(COLECTIUS_PRIVATS)})." if COLECTIUS_PRIVATS else ".")
     )
 
     st.markdown("##### Esquema de dades (orientatiu)")

@@ -48,7 +48,7 @@ CENTRES = {
     "General": "Tots"
 }
 
-CANALS = ["Mòbil-QR", "Correu"]
+CANALS = ["Mòbil-QR", "Correu", "Teams"]
 
 PERIODES = ["2026-T3", "2026-T4"]
 
