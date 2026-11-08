@@ -1,6 +1,6 @@
 # UAB The Hack! 2026 · Repte Estrella Damm
 
-**Escolta** — una plataforma d'escolta activa amb IA per mesurar el clima laboral
+**EscoltDamm** — una plataforma d'escolta activa amb IA per mesurar el clima laboral
 de manera àgil, contínua i representativa. Del problema a l'acció en un sol cicle.
 
 > Prototip de demo. Totes les dades són **100% sintètiques**. No és una eina de
@@ -17,7 +17,6 @@ de manera àgil, contínua i representativa. Del problema a l'acció en un sol c
 
 ## En aquest repositori
 
-- [`PLA_EQUIP.md`](PLA_EQUIP.md) — repartiment de tasques, cronograma i demo.
 - [`docs/CONTRATO_API.md`](docs/CONTRATO_API.md) — contracte entre frontend i backend.
 - [`Applicación/`](Applicación/) — prototip Streamlit executable.
 - [`.env.example`](.env.example) — variables necessàries (sense valors).
