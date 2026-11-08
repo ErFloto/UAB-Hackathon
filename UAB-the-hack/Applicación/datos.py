@@ -36,7 +36,7 @@ POBLACIO = {
     "Comercial": 500,
     "Oficina": 700,
     "Manager": 200,
-    "General": 3600,
+    "General": 3000,
 }
 
 CENTRES = {
@@ -706,7 +706,7 @@ def generar_respostes(n: int = 640, seed: int = 42) -> pd.DataFrame:
     """Genera el conjunt sintètic complet."""
     rng = random.Random(seed)
 
-    prob_col = [0.18, 0.13, 0.19, 0.31, 0.19]  # participació desigual respecte de la població
+    prob_col = [0.18, 0.13, 0.19, 0.31, 0.19, 0.24]  # participació desigual respecte de la població
     registres: list[dict] = []
 
     for i in range(n):
