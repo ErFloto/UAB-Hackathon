@@ -1,117 +1,107 @@
-# Escolta · prototip de demo (Streamlit)
+# EscoltDamm
 
-Plataforma d'escolta activa per al repte **Estrella Damm · UAB The Hack! 2026**.
-Converteix una necessitat de RRHH en una microconsulta adaptada, en participació
-representativa i en insights i accions, amb anonimat i control humà.
+Prototip per al repte d'Estrella Damm de l'UAB The Hack! 2026. La idea és que RRHH pugui
+escriure què vol saber ("com portem els canvis de torn?"), que el sistema proposi una
+microconsulta, que una persona la revisi i la publiqui, i que després es vegi un resum
+agregat amb algunes accions possibles.
 
-> Totes les dades són **100% sintètiques**. No hi ha cap dada real de Damm ni de
-> persones treballadores. Aquest prototip no és una eina de vigilància.
+Totes les dades són sintètiques. No hi ha cap dada real de Damm ni de cap treballador, i
+això no és una eina per controlar ningú.
 
+## Posar-ho en marxa
 
-## ⚙️ Configuració de l'Entorn (Claus d'API)
-
-Aquest projecte utilitza un fitxer ocult de variables d'entorn (`.env`) per connectar-se a la passarel·la d'IA de manera 100% segura, evitant exposar les contrasenyes al codi font.
-
-Per fer funcionar la generació de preguntes amb IA al teu ordinador, segueix aquests passos:
-
-1. A la carpeta de l'aplicació, crea un fitxer anomenat **exactament** `.env` (sense `.txt` ni `.example` al final).
-2. Obre'l amb qualsevol editor de text i copia-hi aquesta estructura:
-
-```env
-
-# Copia aquest fitxer a .env i omple els valors NOMÉS al teu dispositiu.
-
-# Mode de la demo: mock (sense xarxa) o api (backend real)
-ESCOLTA_MODE=api
-
-# Typeform (comparteix el token només dins de l'equip)
-TYPEFORM_TOKEN=
-TYPEFORM_FORM_ID=
-
-# Model d'IA (opcional). Si no hi ha clau, la demo funciona en mode mock.
-OPENAI_API_KEY=
-OPENAI_MODEL=
-
-# Backend propi (si el frontend es connecta a un equip separat)
-ESCOLTA_API_URL= "La teva URL aquí"
-ESCOLTA_API_KEY= "La teva API aqui"
-
-# Llindar mínim de respostes per segment (5-10)
-PRIVACY_THRESHOLD=15.0
-
-PUBLIC_URL="La vostra URL publica"
-
-ADMIN_PIN="Afegir el pin que vulguis, nomes numeros"
-
-
-## Executar-ho en aquest dispositiu (Windows)
-
-Ja hi ha un entorn virtual creat a l'arrel del repositori.
+Cal Python 3.10 o més nou. Des de l'arrel del repositori, a Windows:
 
 ```powershell
-# Des de l'arrel del repositori
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+pip install -r "Applicación\requirements.txt"
 cd "Applicación"
 streamlit run app.py
 ```
 
-Si l'entorn no existeix:
+S'obre a `http://localhost:8501`. Si ja tens l'entorn virtual creat, només cal activar-lo
+i executar l'última comanda.
+
+Perquè el QR funcioni des d'un mòbil (ha d'estar a la mateixa xarxa), arrenca-ho així i
+posa la IP de l'ordinador a `PUBLIC_URL`:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\pip.exe install -r "Applicación\requirements.txt"
+streamlit run app.py --server.address 0.0.0.0
 ```
 
-S'obre a `http://localhost:8501`.
+## Configuració
 
-## Pàgines
+Copia `.env.example` com a `.env` dins d'`Applicación/` i omple'l. El `.env` no es puja
+mai al repositori. Les variables:
 
-| Pàgina | Què demostra |
-| --- | --- |
-| Inici | El problema, el cicle de 8 passos i els tres escenaris de demo |
-| Nova consulta | Necessitat en llenguatge natural → proposta IA → edició → aprovació humana → QR/enllaç |
-| Participació | Representativitat per col·lectiu, canals, marge d'error i alertes |
-| Anàlisi | Temes, sentiment, evolució, temes emergents, senyals febles i PII |
-| Insights i accions | Recomanacions prioritzades, pla 30/60/90 i microconsulta de seguiment |
-| Privacitat | Llindar mínim, esquema de dades, checklist i bones pràctiques |
-| Guió de demo | Repartiment dels 3 minuts, pla B i preguntes del jurat |
+- `ESCOLTA_MODE`: `mock` (per defecte, no necessita xarxa) o `api`, que fa servir la IA.
+- `ESCOLTA_API_URL` i `ESCOLTA_API_KEY`: la passarel·la d'IA, compatible amb OpenAI. Només
+  fan falta amb `api`.
+- `PRIVACY_THRESHOLD_PCT`: el llindar de privacitat, com a percentatge de la població de
+  cada col·lectiu (entre 1 i 10, per defecte 4). Veure l'apartat de privacitat.
+- `PUBLIC_URL`: l'adreça que porten el QR i l'enllaç. Per provar des del mòbil, la IP local
+  (per exemple `http://192.168.1.35:8501`).
+- `ADMIN_PIN`: el PIN del panell de RRHH, només números. Si no n'hi ha, el panell queda
+  bloquejat. Després de 5 intents fallats s'espera un minut.
+- `TEAMS_WEBHOOK_URL`: opcional. Sense ella, la publicació a Teams és simulada.
 
-## Estructura
+Sense configurar res més que el PIN, tot funciona en mode `mock`.
+
+## Què hi ha a l'aplicació
+
+El panell de RRHH té aquestes pàgines: Inici, Nova consulta (de la necessitat a l'enllaç i
+el QR, passant per l'aprovació humana), Participació (qui respon i qui no), Anàlisi (temes,
+sentiment i evolució), Insights i accions, Privacitat i Guió de demo.
+
+La gent que respon no entra al panell: ho fa des de l'enllaç o el QR, que obre només el
+formulari (`?respondre=true`). Hi ha un QR per col·lectiu, i és el QR escanejat el que
+decideix a quin col·lectiu va la resposta; ningú s'identifica.
+
+## Fitxers
 
 ```
 Applicación/
-├── app.py             # entrada Streamlit i navegació
-├── Interfaz.py        # CSS i components visuals
-├── Encuesta.py        # generació de consultes + publicació simulada (QR)
-├── datos.py           # dades sintètiques, PII, classificació per paraules clau
-├── analisis.py        # representativitat, temes, tendències, recomanacions
-├── requirements.txt
-└── .streamlit/config.toml
+├── app.py          navegació, PIN d'admin, panell i formulari públic
+├── Encuesta.py     generació de les consultes
+├── ia.py           resums i accions amb IA
+├── datos.py        dades sintètiques i classificació per paraules clau
+├── analisis.py     llindar de privacitat, representativitat, temes i tendències
+├── respostes.py    desa les respostes reals en un CSV local
+├── pii.py          treu dades personals dels comentaris
+├── qrs.py          codis QR per col·lectiu
+├── teams.py        targeta per a Teams
+├── Interfaz.py     estils
+└── .env.example
 ```
 
-## Mode mock vs. mode API
+`entrenament_nb.py` és un experiment amb Naive Bayes que ara no s'utilitza.
 
-Ara mateix tot funciona en **mode mock** (determinista, sense xarxa). El
-contracte per connectar el frontend amb el backend real és a
-[`../docs/CONTRATO_API.md`](../docs/CONTRATO_API.md).
+## Teams
 
-Punts de substitució:
+Teams ha retirat els webhooks antics, i ara es fa amb Workflows (Power Automate). La
+publicació genera la targeta que s'enviaria, però en aquesta demo va en mode simulat perquè
+no teníem un compte de Microsoft 365 per provar-ho. Amb una URL de Workflows a
+`TEAMS_WEBHOOK_URL`, el mateix botó l'envia de veritat.
 
-- `Encuesta.generar_consulta()` → crida al servei de generació (LLM + regles).
-- `Encuesta.publica_consulta()` → `POST /v1/forms` de Typeform.
-- `datos.generar_respostes()` → lectura de respostes reals de Typeform.
-- `analisis.*` → servei d'anàlisi (el mateix contracte de sortida).
+## Què fa la IA
 
-## Privacitat implementada a la demo
+Proposa preguntes per a la consulta, resumeix els temes i suggereix accions, i opcionalment
+ajuda a detectar noms propis als comentaris. No publica res ni decideix: la consulta l'ha
+d'aprovar una persona abans de sortir, i les accions també les decideix una persona.
 
-- Llindar mínim configurable (5-10 respostes per segment).
-- Només resultats agregats; mai respostes individuals.
-- Redacció automàtica de correus, telèfons, usuaris i noms en contextos explícits.
-- Cap perfil individual ni inferència sobre persones.
-- Control humà obligatori abans de publicar i abans d'actuar.
+## Privacitat
+
+- Les respostes són anònimes: no es desa nom, IP ni dispositiu, només un identificador
+  aleatori, el col·lectiu, el canal i les respostes.
+- Abans de desar un comentari se n'eliminen correus, telèfons, usuaris, URL, DNI/NIE, IBAN
+  i noms propis.
+- Només es mostren resultats agregats. Un col·lectiu amb menys respostes que el llindar
+  s'oculta del tot, també dels totals, perquè no es pugui deduir restant. El llindar és un
+  percentatge de la població del col·lectiu, però mai baixa de 8 respostes.
+- Les respostes caduquen als 90 dies, i el formulari públic ho explica a qui respon.
 
 ## Seguretat
 
-- `.env` i `.env.example` (sense valors) al `.gitignore`.
-- Cap token al codi, al repositori ni a les diapositives.
-- Si es publica el repositori, revisar l'historial de commits.
+El `.env` no es puja al repositori i no hi ha cap clau al codi. El panell de RRHH demana
+PIN. Abans de fer públic el repositori cal revisar l'historial de commits.

@@ -833,12 +833,13 @@ def pagina_nova_consulta() -> None:
                 st.rerun()
 
     st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
-    with st.expander("Com es connecta amb Typeform (contracte tècnic)"):
+    with st.expander("Com es recullen les respostes (formulari propi; connector Forms/Typeform com a evolució)"):
         st.markdown(
-            "1. `POST /v1/forms` amb títol, introducció i camps → retorna `form_id` i `url`.\n"
-            "2. `GET /v1/forms/{form_id}/responses` per recollir respostes (paginat, respectant límits).\n"
-            "3. La nostra capa de privacitat elimina PII abans de desar el comentari.\n"
-            "4. El token de Typeform viu al `.env`, mai al codi ni al repositori."
+            "1. El formulari és propi (Streamlit): l'enllaç o el QR porten el col·lectiu i el canal, no la persona.\n"
+            "2. La nostra capa de privacitat elimina dades personals del comentari **abans** de desar-lo.\n"
+            "3. Només es desen les escales, les respostes tancades i el comentari net; cap IP, dispositiu ni identificador.\n"
+            "4. Evolució: un connector de Microsoft Forms o Typeform (`POST /v1/forms` i lectura de respostes) "
+            "substituiria el formulari propi, mantenint la mateixa capa de privacitat. Qualsevol token viuria al `.env`."
         )
 
 
