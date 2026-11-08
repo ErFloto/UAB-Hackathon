@@ -11,14 +11,17 @@ Les dades són 100% sintètiques i l'anàlisi és determinista i explicable.
 
 from __future__ import annotations
 
+import hmac
 import html
 import os
+import time
 from urllib.parse import urlencode
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+from dotenv import load_dotenv
 from io import BytesIO
 
 import Encuesta
@@ -123,6 +126,59 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 ui.injecta_css()
+
+# ---------------------------------------------------------------------------
+# Accés RRHH: PIN d'administració.
+# La pàgina de resposta (?respondre) queda oberta; tota la resta exigeix PIN.
+# ---------------------------------------------------------------------------
+
+# Rellegeix el .env a cada execució (Streamlit no recarrega Encuesta.py, i així un ADMIN_PIN
+# afegit després d'arrencar l'aplicació també es detecta sense reiniciar).
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), override=True)
+ADMIN_PIN = os.getenv("ADMIN_PIN", "").strip()
+MAX_INTENTS_PIN = 5
+BLOQUEIG_PIN_S = 60
+
+
+@st.cache_resource
+def _intents_pin() -> dict:
+    """Comptador compartit entre sessions per frenar proves repetides de PIN."""
+    return {"fallits": 0, "bloquejat_fins": 0.0}
+
+
+def porta_admin() -> None:
+    """Atura l'execució fins que RRHH introdueixi el PIN correcte (una vegada per sessió)."""
+    if st.session_state.get("admin_ok"):
+        return
+    st.markdown("## 🔒 Accés RRHH")
+    if not ADMIN_PIN:
+        st.error("L'accés d'administració està bloquejat: falta `ADMIN_PIN` al fitxer `.env`.")
+        st.stop()
+    st.caption("Aquesta part de l'aplicació és només per a l'equip de People. Les persones que responen no necessiten PIN.")
+    estat = _intents_pin()
+    restant = estat["bloquejat_fins"] - time.time()
+    if restant > 0:
+        st.warning(f"Massa intents fallits. Torna-ho a provar d'aquí {int(restant) + 1} s.")
+        st.stop()
+    with st.form("form_pin_admin"):
+        pin = st.text_input("PIN d'administració", type="password")
+        entrat = st.form_submit_button("Entrar", type="primary")
+    if entrat:
+        if hmac.compare_digest(pin.encode("utf-8"), ADMIN_PIN.encode("utf-8")):
+            estat["fallits"] = 0
+            st.session_state.admin_ok = True
+            st.rerun()
+        estat["fallits"] += 1
+        if estat["fallits"] >= MAX_INTENTS_PIN:
+            estat["fallits"] = 0
+            estat["bloquejat_fins"] = time.time() + BLOQUEIG_PIN_S
+            st.warning(f"Massa intents fallits. Accés bloquejat durant {BLOQUEIG_PIN_S} s.")
+        else:
+            st.error("PIN incorrecte.")
+    st.stop()
+
+
+porta_admin()
 
 PAGINES = [
     "Inici",
@@ -247,6 +303,10 @@ with st.sidebar:
     if st.button("Regenerar dades", width="stretch"):
         st.session_state.seed += 1
         st.cache_data.clear()
+        st.rerun()
+
+    if st.button("🔒 Tancar sessió RRHH", width="stretch"):
+        st.session_state.admin_ok = False
         st.rerun()
 
     st.markdown("---")
