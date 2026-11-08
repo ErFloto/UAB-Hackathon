@@ -1,0 +1,19 @@
+﻿# Secretos
+.env
+*.env
+!.env.example
+
+# Entorno y caché de Python
+.venv/
+__pycache__/
+*.pyc
+
+# Datos generados en local
+respostes_reals.csv
+consulta_activa.json
+*.joblib
+
+# Editor / sistema
+.vscode/
+.DS_Store
+Thumbs.db
