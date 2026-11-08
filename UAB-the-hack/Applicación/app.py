@@ -234,17 +234,17 @@ def panel_distribucion_encuesta(consulta: dict) -> None:
     ip_local = "localhost" 
     url_publica = f"http://{ip_local}:8501/?respondre=true"  # <--- Canvi clau aquí
     
-    st.subheader("🚀 Consulta llesta per distribuir")
+    st.subheader("Consulta llesta per distribuir")
     
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.markdown("### 🔗 Enllaç Web")
+        st.markdown("###  Enllaç Web")
         st.code(url_publica, language="text")
         st.markdown(f"[Obrir pàgina de votació]({url_publica})")
         st.caption("Clica l'enllaç per provar la pàgina exclusiva.")
 
     with c2:
-        st.markdown("### 📱 Codi QR")
+        st.markdown("###  Codi QR")
         qr = qrcode.QRCode(version=1, box_size=10, border=4)
         qr.add_data(url_publica)
         qr.make(fit=True)
@@ -258,7 +258,7 @@ def panel_distribucion_encuesta(consulta: dict) -> None:
         st.download_button("⬇️ Descarregar QR", data=qr_bytes, file_name="qr_enquesta.png", mime="image/png", use_container_width=True)
 
     with c3:
-        st.markdown("### 📡 Etiqueta NFC")
+        st.markdown("###  Etiqueta NFC")
         st.info("Per activar físicament el punt d'enquesta:")
         st.write("1. Obre **NFC Tools** al teu mòbil.")
         st.write("2. Tria **Escriure > Afegir registre > URL**.")
