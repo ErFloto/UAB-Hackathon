@@ -262,17 +262,32 @@ def pagina_inici() -> None:
 
 
 def _preguntes_a_df(preguntes: list[dict]) -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {
-                "Pregunta": p["text"],
-                "Tipus": p["tipus"],
-                "Opcions": " · ".join(p.get("opcions", [])),
-                "Obligatòria": bool(p.get("obligatoria", True)),
-            }
-            for p in preguntes
-        ]
-    )
+    files = []
+    for p in preguntes:
+        # Agafem les opcions (pot ser que la IA no hagi posat la clau)
+        opcions = p.get("opcions", [])
+        
+        # Si la IA ha retornat 'null'
+        if opcions is None:
+            opcions_str = ""
+        # Si la IA s'ha equivocat i ha retornat un text en lloc d'una llista
+        elif isinstance(opcions, str):
+            opcions_str = opcions
+        # Si és una llista (el comportament esperat)
+        elif isinstance(opcions, list):
+            # Ens assegurem que tot el que hi ha dins es converteixi a text (str) abans d'unir-ho
+            opcions_str = " · ".join([str(opt) for opt in opcions])
+        else:
+            opcions_str = ""
+
+        files.append({
+            "Pregunta": p.get("text", "Pregunta sense text"),
+            "Tipus": p.get("tipus", "Text obert"),
+            "Opcions": opcions_str,
+            "Obligatòria": bool(p.get("obligatoria", True)),
+        })
+        
+    return pd.DataFrame(files)
 
 
 def _df_a_preguntes(editat: pd.DataFrame, originals: list[dict]) -> list[dict]:

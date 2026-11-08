@@ -5,17 +5,22 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 import matplotlib
+import os
+import json
+import requests
 
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
-import os
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from datetime import datetime
 from dotenv import load_dotenv
 
-import json
-import requests
+
 
 # Carrega les variables del fitxer .env
 load_dotenv()
@@ -243,6 +248,26 @@ def generar_consulta(necessitat: dict, variacio: int = 0) -> dict:
         "enllac": "",
         "publicada_el": "",
     }
+
+SCOPES = ['https://www.googleapis.com/auth/forms.body']
+
+def autenticar_google():
+    """Autentica l'usuari a través d'OAuth2 per connectar amb l'API de Google Workspace."""
+    creds = None
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            # Llegeix el credentials.json descarregat de Google Cloud Console
+            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
+            
+    return creds
 
 def publica_consulta(consulta: dict) -> dict:
     """Marca la consulta com a publicada i prepara un QR/enllaç de demostració."""
