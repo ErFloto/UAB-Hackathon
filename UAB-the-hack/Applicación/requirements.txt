@@ -5,8 +5,11 @@ plotly>=5.24
 matplotlib>=3.8
 qrcode[pil]>=8.0
 Pillow>=10.0
-dotenv
-steamlib
+
+# Variables d'entorn (.env) i crides HTTP a la IA
+python-dotenv>=1.0
+requests>=2.31
+
 # Dades sintètiques i anonimització
 faker>=24.0
 
