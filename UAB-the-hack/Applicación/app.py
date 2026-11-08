@@ -27,6 +27,7 @@ import analisis
 import datos
 import ia
 import qrcode
+import respostes
 
 params = st.query_params
 MODO_RESPOTA = "respondre" in params
@@ -64,7 +65,7 @@ if MODO_RESPOTA:
         st.balloons()
     else:
         # Si NO ha respost, mostrem el formulari
-        with st.form("formulari_public_exterior", clear_on_submit=True):
+        with st.form("formulari_public_exterior", clear_on_submit=False):
             respostes_usuari = {}
             preguntes = consulta_activa.get("preguntes", [])
             
@@ -91,9 +92,22 @@ if MODO_RESPOTA:
                 
             enviat = st.form_submit_button("Enviar respostes", type="primary", use_container_width=True)
             if enviat:
-                # Canviem l'estat a True i recarreguem la pàgina
-                st.session_state.enquesta_enviada = True
-                st.rerun()
+                # Les preguntes de text obert obligatòries no es poden deixar buides.
+                buides = [
+                    q for q in preguntes
+                    if q.get("obligatoria") and q.get("tipus") == Encuesta.TIPUS_OBERT
+                    and not str(respostes_usuari.get(q.get("id", ""), "")).strip()
+                ]
+                if buides:
+                    st.error("Falta respondre alguna pregunta obligatòria.")
+                else:
+                    # El col·lectiu i el canal vénen del QR (?col=...&canal=...), no de la persona.
+                    respostes.desa_resposta(
+                        consulta_activa, respostes_usuari,
+                        params.get("col"), params.get("canal"),
+                    )
+                    st.session_state.enquesta_enviada = True
+                    st.rerun()
                 
     st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
@@ -157,7 +171,10 @@ def carrega_dades(seed: int, n: int) -> pd.DataFrame:
     return datos.generar_respostes(n=n, seed=seed)
 
 
-df_global = carrega_dades(st.session_state.seed, st.session_state.n_respostes)
+_base_sintetica = carrega_dades(st.session_state.seed, st.session_state.n_respostes)
+# Respostes en directe (formulari QR) guardades a respostes_reals.csv; s'afegeixen a les sintètiques.
+_reals = respostes.carrega_reals()
+df_global = pd.concat([_base_sintetica, _reals], ignore_index=True) if not _reals.empty else _base_sintetica
 llindar = st.session_state.llindar
 
 
@@ -214,7 +231,8 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.markdown(
-        f"<div style='font-size:0.85rem;color:#F1E4D8'>{len(df_global):,} respostes sintètiques<br>"
+        f"<div style='font-size:0.85rem;color:#F1E4D8'>{len(_base_sintetica):,} respostes sintètiques"
+        f" + {len(_reals)} en directe<br>"
         f"2 períodes · seed {st.session_state.seed}</div>",
         unsafe_allow_html=True,
     )

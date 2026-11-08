@@ -356,6 +356,8 @@ def proposta_seguiment(df: pd.DataFrame) -> dict:
 def precisio_classificacio(df: pd.DataFrame) -> dict[str, float]:
     no_buida = df[df["comentari_obert"].astype(str).str.strip() != ""]
     amb_text = no_buida[no_buida["tema_detectat"] != "Altres"]
+    # Només es valida contra l'etiqueta oculta on n'hi ha (les respostes en directe no en tenen).
+    amb_text = amb_text[amb_text["tema_real"].notna()]
     if amb_text.empty:
         return {"temes": 0.0, "sentiment": 0.0, "cobertura": 0.0}
     temes = (amb_text["tema_detectat"] == amb_text["tema_real"]).mean() * 100
