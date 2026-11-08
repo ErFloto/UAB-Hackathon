@@ -68,7 +68,7 @@ TIPUS_OBERT = "Text obert"
 # ---------------------------------------------------------------------------
 
 X_synthetic, y_synthetic = make_classification(
-    n_samples=200,
+    n_samples=500,
     n_features=25,
     n_informative=15,
     n_redundant=5,
